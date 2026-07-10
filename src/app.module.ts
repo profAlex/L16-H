@@ -13,6 +13,7 @@ import { APP_FILTER } from '@nestjs/core';
 import { AllHttpExceptionsFilter } from './core/exceptions/filters/all-exceptions.filter';
 import { DomainHttpExceptionsFilter } from './core/exceptions/filters/domain-exceptions.filter';
 import { CqrsModule } from '@nestjs/cqrs';
+import { configModule } from './config';
 
 @Module({
     //все модули должны быть заимпортированы в корневой модуль, либо напрямую, либо по цепочке (через другие модули)
@@ -25,6 +26,7 @@ import { CqrsModule } from '@nestjs/cqrs';
         CoreModule,
         AuthorisationModule,
         NotificationsModule,
+        configModule
     ],
     controllers: [AppController],
     providers: [

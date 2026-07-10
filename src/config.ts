@@ -7,4 +7,5 @@ export const configModule = ConfigModule.forRoot({
         `.env.${process.env.NODE_ENV}`,
         '.env.production',
     ],
+    isGlobal: true,
 });
