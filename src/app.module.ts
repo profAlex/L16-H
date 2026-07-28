@@ -1,3 +1,5 @@
+// import of this config module must be on top of imports list
+import { configModule } from './config';
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -13,13 +15,21 @@ import { APP_FILTER } from '@nestjs/core';
 import { AllHttpExceptionsFilter } from './core/exceptions/filters/all-exceptions.filter';
 import { DomainHttpExceptionsFilter } from './core/exceptions/filters/domain-exceptions.filter';
 import { CqrsModule } from '@nestjs/cqrs';
-import { configModule } from './config';
+import { AppConfig } from './core/app.config';
 
 @Module({
     //все модули должны быть заимпортированы в корневой модуль, либо напрямую, либо по цепочке (через другие модули)
     imports: [
         CqrsModule.forRoot(),
-        MongooseModule.forRoot(envConfig.mongoURI),
+        MongooseModule.forRootAsync({
+            inject: [AppConfig],
+            useFactory: async (appConfig: AppConfig) => {
+                return {
+                    uri:  appConfig.MONGO_URI_LOCAL,
+
+                };
+            },
+        }),
         UserAccountsModule,
         TestingModule,
         BloggersPlatformModule,
@@ -40,6 +50,7 @@ import { configModule } from './config';
             provide: APP_FILTER,
             useClass: DomainHttpExceptionsFilter,
         },
+        AppConfig,
     ],
 })
 export class AppModule {}
