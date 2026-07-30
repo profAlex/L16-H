@@ -13,6 +13,9 @@
           "introspectComments": true
         }
       }
+    ],
+    "assets": [
+      { "include": "**/env/*", "watchAssets": true }
     ]
   }
 }

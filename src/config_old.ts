@@ -77,7 +77,7 @@ const getConfig = (): Config => {
 
     if (!accessTokenLifetime) {
         console.warn(
-            `ACCESS_TOKEN_LIFETIME is not defined in .env! Applied default value (seconds) (: ${DEFAULT_ACCESS_TOKEN_LIFETIME}.`,
+            `ACCESS_TOKEN_LIFETIME is not defined in .env! Applied default value (seconds): ${DEFAULT_ACCESS_TOKEN_LIFETIME}.`,
         );
         accessTokenLifetime = DEFAULT_ACCESS_TOKEN_LIFETIME;
     }

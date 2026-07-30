@@ -1,31 +1,96 @@
 // димыч видео environments configuration 16 lesson
 import { Global, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { IsNotEmpty, IsNumber, IsString, validateSync } from 'class-validator';
 
 @Injectable()
 export class AppConfig {
-    constructor(private configService: ConfigService) {}
+    @IsNumber({}, { message: 'PORT должен быть числом' })
+    readonly PORT: number;
 
-    PORT: number = Number(this.configService.get('PORT'));
-    ACCESS_TOKEN_SECRET: string = String(
-        this.configService.get('ACCESS_TOKEN_SECRET'),
-    );
-    REFRESH_TOKEN_SECRET: string = String(
-        this.configService.get('REFRESH_TOKEN_SECRET'),
-    );
-    ACCESS_TOKEN_LIFETIME: number = Number(
-        this.configService.get('ACCESS_TOKEN_LIFETIME'),
-    );
-    REFRESH_TOKEN_LIFETIME: number = Number(
-        this.configService.get('REFRESH_TOKEN_LIFETIME'),
-    );
-    MAIL_PORT: number = Number(this.configService.get('MAIL_PORT'));
-    MAIL_HOST: string = String(this.configService.get('MAIL_HOST'));
-    MAIL_LOGIN: string = String(this.configService.get('MAIL_LOGIN'));
-    MAIL_PASS: string = String(this.configService.get('MAIL_PASS'));
-    MONGO_URI: string = String(this.configService.get('MONGO_URI'));
-    MONGO_URI_LOCAL: string = String(this.configService.get('MONGO_URI_LOCAL'));
+    @IsString({ message: 'ACCESS_TOKEN_SECRET должен быть строкой' })
+    @IsNotEmpty({ message: 'ACCESS_TOKEN_SECRET не может быть пустым' })
+    readonly ACCESS_TOKEN_SECRET: string;
 
+    @IsString({ message: 'REFRESH_TOKEN_SECRET должен быть строкой' })
+    @IsNotEmpty({ message: 'REFRESH_TOKEN_SECRET не может быть пустым' })
+    readonly REFRESH_TOKEN_SECRET: string;
+
+    @IsNumber({}, { message: 'ACCESS_TOKEN_LIFETIME должен быть числом' })
+    @IsNotEmpty({ message: 'ACCESS_TOKEN_LIFETIME не может быть пустым' })
+    readonly ACCESS_TOKEN_LIFETIME: number;
+
+    @IsNumber({}, { message: 'REFRESH_TOKEN_LIFETIME должен быть числом' })
+    @IsNotEmpty({ message: 'REFRESH_TOKEN_LIFETIME не может быть пустым' })
+    readonly REFRESH_TOKEN_LIFETIME: number;
+
+    @IsNumber({}, { message: 'MAIL_PORT должен быть числом' })
+    @IsNotEmpty({ message: 'MAIL_PORT не может быть пустым' })
+    readonly MAIL_PORT: number;
+
+    @IsString({ message: 'MAIL_HOST должен быть строкой' })
+    @IsNotEmpty({ message: 'MAIL_HOST не может быть пустым' })
+    readonly MAIL_HOST: string;
+
+    @IsString({ message: 'MAIL_LOGIN должен быть строкой' })
+    @IsNotEmpty({ message: 'MAIL_LOGIN не может быть пустым' })
+    readonly MAIL_LOGIN: string;
+
+    @IsString({ message: 'MAIL_PASS должен быть строкой' })
+    @IsNotEmpty({ message: 'MAIL_PASS не может быть пустым' })
+    readonly MAIL_PASS: string;
+
+    @IsString({ message: 'MONGO_URI должен быть строкой' })
+    @IsNotEmpty({ message: 'MONGO_URI не может быть пустым' })
+    readonly MONGO_URI: string;
+
+    @IsString({ message: 'MONGO_URI_LOCAL должен быть строкой' })
+    @IsNotEmpty({ message: 'MONGO_URI_LOCAL не может быть пустым' })
+    readonly MONGO_URI_LOCAL: string;
+
+
+
+    constructor(private configService: ConfigService) {
+        // Вспомогательные функции для защиты от NaN и строки "undefined"
+        const getString = (key: string) => this.configService.get<string>(key) ?? '';
+        const getNumber = (key: string) => {
+            const val = this.configService.get(key);
+            return val !== undefined && val !== '' ? Number(val) : (undefined as unknown as number);
+        };
+
+        this.PORT = getNumber('PORT');
+        this.ACCESS_TOKEN_SECRET = getString('ACCESS_TOKEN_SECRET');
+        this.REFRESH_TOKEN_SECRET = getString('REFRESH_TOKEN_SECRET');
+        this.ACCESS_TOKEN_LIFETIME = getNumber('ACCESS_TOKEN_LIFETIME');
+        this.REFRESH_TOKEN_LIFETIME = getNumber('REFRESH_TOKEN_LIFETIME');
+        this.MAIL_PORT = getNumber('MAIL_PORT');
+        this.MAIL_HOST = getString('MAIL_HOST');
+        this.MAIL_LOGIN = getString('MAIL_LOGIN');
+        this.MAIL_PASS = getString('MAIL_PASS');
+        this.MONGO_URI = getString('MONGO_URI');
+        this.MONGO_URI_LOCAL = getString('MONGO_URI_LOCAL');
+
+        // 3. Валидация
+        const errors = validateSync(this, {
+            // stopAtFirstError: false // Проверять ВСЕ правила (декораторы) для каждого свойства, однако некоторые пары декораторов будут срабатывать и без этой опции
+
+        });
+
+        if (errors.length > 0) {
+            const messages = errors
+                .flatMap((error) => (error.constraints ? Object.values(error.constraints) : []))
+                .map((msg) => `- ${msg}`)
+                .join('\n');
+
+            throw new Error(`Ошибка конфигурации приложения (.env):\n${messages}`);
+        }
+    }
+
+    // а можно делать через get
+    // get — это встроенное ключевое слово JavaScript / TypeScript
+    // Обозначает «Свойство-аксессор» (геттер). Позволяет писать логику
+    // (код) внутри, но обращаться к ней снаружи как к простой переменной
+    // (без скобок ()).
     get IN_PRODUCTION(): boolean {
         // Защита от 'IN_PRODUCTION=false', которое через Boolean() даст true
         return this.configService.get('IN_PRODUCTION') === 'true';
