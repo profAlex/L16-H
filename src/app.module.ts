@@ -25,7 +25,7 @@ import { AppConfig } from './core/app.config';
             inject: [AppConfig],
             useFactory: async (appConfig: AppConfig) => {
                 return {
-                    uri: appConfig.MONGO_URI_LOCAL,
+                    uri: appConfig.MONGO_URI,
 
                 };
             },
@@ -33,10 +33,10 @@ import { AppConfig } from './core/app.config';
         UserAccountsModule,
         TestingModule,
         BloggersPlatformModule,
-        CoreModule,
         AuthorisationModule,
         NotificationsModule,
-        configModule
+        configModule,
+        CoreModule,
     ],
     controllers: [AppController],
     providers: [

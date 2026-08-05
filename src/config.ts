@@ -9,7 +9,7 @@ export const configModule = ConfigModule.forRoot({
         nodeEnv ? join(__dirname, `env`,`.env.${nodeEnv}.local`) : null,
         nodeEnv ? join(__dirname, `env`,`.env.${nodeEnv}`) : null,
         '.env.production',
-    ].filter(Boolean)as string[],
+    ].filter(Boolean) as string[],
     // здесь as string[] — это Type Assertion (утверждение типа) в TypeScript.
     // Она буквально говорит компилятору:
     // "TypeScript, поверь мне на слово, после метода .filter(Boolean) в этом массиве

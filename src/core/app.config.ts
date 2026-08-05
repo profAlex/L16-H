@@ -44,9 +44,17 @@ export class AppConfig {
     @IsNotEmpty({ message: 'MONGO_URI не может быть пустым' })
     readonly MONGO_URI: string;
 
-    @IsString({ message: 'MONGO_URI_LOCAL должен быть строкой' })
-    @IsNotEmpty({ message: 'MONGO_URI_LOCAL не может быть пустым' })
-    readonly MONGO_URI_LOCAL: string;
+    // @IsString({ message: 'MONGO_URI_LOCAL должен быть строкой' })
+    // @IsNotEmpty({ message: 'MONGO_URI_LOCAL не может быть пустым' })
+    // readonly MONGO_URI_LOCAL: string;
+
+    @IsNumber({}, { message: 'THROTTLE_TTL должен быть числом' })
+    @IsNotEmpty({ message: 'THROTTLE_TTL не может быть пустым' })
+    readonly THROTTLE_TTL: number;
+
+    @IsNumber({}, { message: 'THROTTLE_LIMIT должен быть числом' })
+    @IsNotEmpty({ message: 'THROTTLE_LIMIT не может быть пустым' })
+    readonly THROTTLE_LIMIT: number;
 
 
 
@@ -68,7 +76,9 @@ export class AppConfig {
         this.MAIL_LOGIN = getString('MAIL_LOGIN');
         this.MAIL_PASS = getString('MAIL_PASS');
         this.MONGO_URI = getString('MONGO_URI');
-        this.MONGO_URI_LOCAL = getString('MONGO_URI_LOCAL');
+        // this.MONGO_URI_LOCAL = getString('MONGO_URI_LOCAL');
+        this.THROTTLE_TTL = getNumber('THROTTLE_TTL');
+        this.THROTTLE_LIMIT = getNumber('THROTTLE_LIMIT');
 
         // 3. Валидация
         const errors = validateSync(this, {

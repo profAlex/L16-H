@@ -16,6 +16,7 @@ import {UsersRepository} from "../user-accounts/infrastructure/users.repository"
 import {UsersQueryRepository} from "../user-accounts/infrastructure/query/users.query-repository";
 import { ConfigService } from '@nestjs/config';
 import { AppConfig } from '../../core/app.config';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
     imports: [
@@ -36,9 +37,19 @@ import { AppConfig } from '../../core/app.config';
         MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
         NotificationsModule,
         UserAccountsModule,
+        ThrottlerModule.forRootAsync({
+            inject: [AppConfig],
+            useFactory: (appConfig: AppConfig) => [
+                {
+                    ttl: appConfig.THROTTLE_TTL, //  in milliseconds
+                    limit: appConfig.THROTTLE_LIMIT,
+                },
+            ],
+        }),
     ],
     controllers: [AuthController, SecurityDevicesController],
-    providers: [AuthService,
+    providers: [
+        AuthService,
         // SecurityDevicesQueryRepository,
         LocalStrategy, // Паспортная стратегия для логина
         JwtStrategy,   // Паспортная стратегия для гвардов
