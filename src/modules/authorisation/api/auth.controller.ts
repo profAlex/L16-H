@@ -22,10 +22,13 @@ import { MeViewDto } from './view-dto/me.view-dto';
 import { UserLoginInputDto } from '../../user-accounts/api/input-dto/login-user.input-dto';
 import { Response } from 'express';
 import { ThrottlerGuard } from '@nestjs/throttler';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 
 @Controller('auth')
 export class AuthController {
-    constructor(private authService: AuthService) {
+    constructor(private authService: AuthService,
+                private readonly commandBus: CommandBus,
+                private readonly queryBus: QueryBus,) {
         console.log('AuthController created');
     }
 
