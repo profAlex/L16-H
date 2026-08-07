@@ -1,8 +1,8 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { UserContextDto } from '../guards/dto/user-context.dto';
+import { UserAccessTokenContextDto } from '../guards/dto/user-access-token-context.dto';
 
 export const ExtractUserIfExistsFromRequest = createParamDecorator(
-    (data: unknown, context: ExecutionContext): UserContextDto | null => {
+    (data: unknown, context: ExecutionContext): UserAccessTokenContextDto | null => {
         const request = context.switchToHttp().getRequest();
 
         if (!request.user) {
@@ -14,7 +14,7 @@ export const ExtractUserIfExistsFromRequest = createParamDecorator(
 );
 
 export const ExtractLoginIfUserExists = createParamDecorator(
-    (data: unknown, context: ExecutionContext): UserContextDto | null => {
+    (data: unknown, context: ExecutionContext): UserAccessTokenContextDto | null => {
         const request = context.switchToHttp().getRequest();
 
         if (!request.user) {

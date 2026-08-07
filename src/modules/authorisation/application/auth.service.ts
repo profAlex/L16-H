@@ -1,5 +1,5 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { UserContextDto } from '../guards/dto/user-context.dto';
+import { UserAccessTokenContextDto } from '../guards/dto/user-access-token-context.dto';
 import { CryptoService } from '../../../core/bcrypt/bcrypt.service';
 import { JwtService } from '@nestjs/jwt';
 import { EmailService } from '../../notifications/email.service';
@@ -23,7 +23,7 @@ export class AuthService {
     async validateUserCreds(
         loginOrEmail: string,
         password: string,
-    ): Promise<UserContextDto | null> {
+    ): Promise<UserAccessTokenContextDto | null> {
         const user = await this.usersService.findUserByLogin(loginOrEmail);
 
         if (!user) {
@@ -45,7 +45,7 @@ export class AuthService {
     async loginUser(userId: string): Promise<{ accessToken: string }> {
         const accessToken = await this.jwtService.signAsync({
             id: userId,
-        } as UserContextDto);
+        } as UserAccessTokenContextDto);
 
         return { accessToken: accessToken };
     }

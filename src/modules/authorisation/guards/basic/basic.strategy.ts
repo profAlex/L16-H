@@ -3,12 +3,12 @@ import { PassportStrategy } from '@nestjs/passport';
 import {DomainException} from "../../../../core/exceptions/domain-exceptions";
 import {DomainExceptionCode} from "../../../../core/exceptions/domain-exception-codes";
 
-// 1. Берем класс напрямую через require, чтобы обойти кривой импорт модулей
+// стратегия для выполнения действий с вводом логина и пароля админа
 const BasicStrategyClass = require('passport-http').Strategy;
 
 @Injectable()
 export class BasicAuthStrategy extends PassportStrategy(
-    // 2. Принудительно приводим к any, чтобы убрать ошибку TS2345 про "missing properties apply, call..."
+    // принудительно приводим к any, чтобы убрать ошибку TS2345 про "missing properties apply, call..."
     BasicStrategyClass as any,
     'basic'
 ) {
@@ -16,7 +16,6 @@ export class BasicAuthStrategy extends PassportStrategy(
         super();
     }
 
-    // 3. Здесь типизация работает идеально: Passport передаст чистые строки из заголовка
     async validate(username: string, password: string): Promise<boolean> {
         const adminUser = 'admin';
         const adminPass = 'qwerty'; // В проде лучше юзать process.env.BASIC_AUTH_PASS

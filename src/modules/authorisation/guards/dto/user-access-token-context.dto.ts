@@ -1,6 +1,8 @@
-export type UserContextDto = {
+export type UserAccessTokenContextDto = {
     id: string;
 };
+
+
 
 // Эта запись называется Mapped Type (сопоставленный или отображаемый тип).
 // По сути, это функция для типов: она принимает один тип данных, "пробегается"

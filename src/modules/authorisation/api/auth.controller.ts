@@ -4,13 +4,13 @@ import {
     Get,
     HttpCode,
     HttpStatus,
-    Post,
+    Post, Req,
     Res,
     UseGuards,
 } from '@nestjs/common';
 import { LocalAuthGuard } from '../guards/local/local.auth-guard';
 import { ExtractUserIfExistsFromRequest } from '../decorators/extract-user-if-exists.decorator';
-import { UserContextDto } from '../guards/dto/user-context.dto';
+import { UserAccessTokenContextDto } from '../guards/dto/user-access-token-context.dto';
 import { AuthService } from '../application/auth.service';
 import { RegisterNewUserDto } from './input-dto/register-new-user.input-dto';
 import { RegistrationConfirmationInputDto } from './input-dto/registration-confirmation.input-dto';
@@ -20,9 +20,10 @@ import { RegistrationEmailResendingInputDto } from './input-dto/registration-ema
 import { JwtAuthGuard } from '../guards/bearer/jwt.auth-guard';
 import { MeViewDto } from './view-dto/me.view-dto';
 import { UserLoginInputDto } from '../../user-accounts/api/input-dto/login-user.input-dto';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { LoginUser } from '../application/usecases/login-user.usecase';
 
 @Controller('auth')
 export class AuthController {
@@ -39,13 +40,17 @@ export class AuthController {
     @Post('login')
     async login(
         @Body() body: UserLoginInputDto,
-        @ExtractUserIfExistsFromRequest() user: UserContextDto,
+        @ExtractUserIfExistsFromRequest() user: UserAccessTokenContextDto,
         @Res({ passthrough: true }) res: Response,
+        @Req() req: Request,
     ): Promise<{
         accessToken: string;
     }> {
-        const refreshToken = 'fakeHeader.fakePayload.fakeSignature';
-        res.cookie('refreshToken', refreshToken, {
+        const tokensPair = AWAIT?? this.commandBus.execute<LoginUser>(
+            new LoginUser(postId, body, user.id),
+        );
+
+        res.cookie('refreshToken', tokensPair.refreshToken, {
             httpOnly: true,
             secure: true,
             sameSite: 'none',
@@ -53,6 +58,15 @@ export class AuthController {
         });
 
         return this.authService.loginUser(user.id);
+
+
+        //
+        // // здесь логика у нас следующая
+        // // - в любом случае создаем новую сессию со всеми присущими определенными идентификаторами и параметрами
+        //
+        // // создаем сессию в базе
+        // const isSuccessfulSessionCreated =
+        //     await dataCommandRepository.createSession(tempSession);
     }
 
     // Password recovery via Email confirmation. Email should be sent with RecoveryCode inside
@@ -113,7 +127,7 @@ export class AuthController {
     @UseGuards(JwtAuthGuard)
     @Get('me')
     async requestMe(
-        @ExtractUserIfExistsFromRequest() user: UserContextDto,
+        @ExtractUserIfExistsFromRequest() user: UserAccessTokenContextDto,
     ): Promise<MeViewDto> {
         return this.authService.getMeInfo(user.id);
     }

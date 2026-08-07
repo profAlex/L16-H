@@ -21,7 +21,7 @@ import { CommentsCommandRepository } from '../infrastructure/comments.command-re
 import { CommentsService } from '../application/comments.service';
 import { DomainException } from '../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../core/exceptions/domain-exception-codes';
-import { UserContextDto } from '../../../authorisation/guards/dto/user-context.dto';
+import { UserAccessTokenContextDto } from '../../../authorisation/guards/dto/user-access-token-context.dto';
 import { BasicAuthGuard } from '../../../authorisation/guards/basic/basic.auth-guard';
 import { ExtractUserIfExistsFromRequest } from '../../../authorisation/decorators/extract-user-if-exists.decorator';
 import { DeletePostById } from '../../posts/application/usecases/delete-post-by-id.usecase';
@@ -58,7 +58,7 @@ export class CommentsController {
     async changeCommentLikeStatus(
         @Param('commentId') commentId: string,
         @Body() body: ChangeCommentLikeStatusInputDto,
-        @ExtractUserIfExistsFromRequest() user: UserContextDto,
+        @ExtractUserIfExistsFromRequest() user: UserAccessTokenContextDto,
     ) {
         return this.commandBus.execute<ChangeCommentLikeStatus>(
             new ChangeCommentLikeStatus({
@@ -75,7 +75,7 @@ export class CommentsController {
     @Get(':id')
     async getCommentById(
         @Param('id') commentId: string,
-        @ExtractUserIfExistsFromRequest() user: UserContextDto,
+        @ExtractUserIfExistsFromRequest() user: UserAccessTokenContextDto,
     ): Promise<CommentViewDto> {
         const comment = await this.commentsQueryRepository.getCommentById(
             commentId,
@@ -101,7 +101,7 @@ export class CommentsController {
     async updateCommentById(
         @Param('commentId') commentId: string,
         @Body() body: UpdateCommentInputDto,
-        @ExtractUserIfExistsFromRequest() user: UserContextDto,
+        @ExtractUserIfExistsFromRequest() user: UserAccessTokenContextDto,
     ): Promise<void> {
         return this.commandBus.execute<UpdateCommentById>(
             new UpdateCommentById(commentId, user.id, body.content),
@@ -115,7 +115,7 @@ export class CommentsController {
     @HttpCode(HttpStatus.NO_CONTENT)
     async deleteCommentById(
         @Param('commentId') commentId: string,
-        @ExtractUserIfExistsFromRequest() user: UserContextDto,
+        @ExtractUserIfExistsFromRequest() user: UserAccessTokenContextDto,
     ): Promise<void> {
         return this.commandBus.execute<DeleteCommentById>(
             new DeleteCommentById(commentId, user.id),

@@ -35,7 +35,7 @@ import { UpdateBlogInputDto } from '../dto/create-blog.dto';
 import { BasicAuthGuard } from '../../../authorisation/guards/basic/basic.auth-guard';
 import { JwtOptionalAuthGuard } from '../../../authorisation/guards/bearer/jwt.auth-guard';
 import { ExtractUserIfExistsFromRequest } from '../../../authorisation/decorators/extract-user-if-exists.decorator';
-import { UserContextDto } from '../../../authorisation/guards/dto/user-context.dto';
+import { UserAccessTokenContextDto } from '../../../authorisation/guards/dto/user-access-token-context.dto';
 
 @ApiTags('Blogs endpoint')
 @Controller('blogs')
@@ -94,7 +94,7 @@ export class BlogsController {
     async getPostsByBlogId(
         @Param('blogId') blogId: string,
         @Query() query: GetPostsQueryParams,
-        @ExtractUserIfExistsFromRequest() user: UserContextDto,
+        @ExtractUserIfExistsFromRequest() user: UserAccessTokenContextDto,
     ): Promise<PaginatedViewDto<PostViewDto>> {
         return this.postsService.getPostsByBlogId({
             userId: user?.id,

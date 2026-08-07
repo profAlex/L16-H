@@ -2,7 +2,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
-import { UserContextDto } from '../dto/user-context.dto';
+import { UserAccessTokenContextDto } from '../dto/user-access-token-context.dto';
 import { AppConfig } from '../../../../core/app.config';
 import { Request } from 'express';
 
@@ -23,7 +23,7 @@ export class JwtRefreshTokenStrategy extends PassportStrategy(
         });
     }
 
-    async validate(userData: UserContextDto): Promise<UserContextDto> {
+    async validate(userData: UserAccessTokenContextDto): Promise<UserAccessTokenContextDto> {
         return userData;
     }
 }

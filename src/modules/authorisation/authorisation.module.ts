@@ -17,6 +17,8 @@ import {UsersQueryRepository} from "../user-accounts/infrastructure/query/users.
 import { ConfigService } from '@nestjs/config';
 import { AppConfig } from '../../core/app.config';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { JwtTokenProvider } from './application/jwt-token-provider/jwt-token-provider.service';
+import { Session, SessionSchema } from './domain/session.entity';
 
 @Module({
     imports: [
@@ -30,11 +32,11 @@ import { ThrottlerModule } from '@nestjs/throttler';
             // imports: [AppConfig], // но это только для модулей, классы передаются в раздел providers
             inject: [AppConfig],
             useFactory: async (appConfig: AppConfig) => ({
-                secret: appConfig.ACCESS_TOKEN_SECRET,
-                signOptions: { expiresIn: `${appConfig.ACCESS_TOKEN_LIFETIME}s` },
+                // secret: appConfig.ACCESS_TOKEN_SECRET,
+                // signOptions: { expiresIn: `${appConfig.ACCESS_TOKEN_LIFETIME}s` },
             }),
         }),
-        MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+        MongooseModule.forFeature([{ name: User.name, schema: UserSchema }, { name: Session.name, schema: SessionSchema }]),
         NotificationsModule,
         UserAccountsModule,
         ThrottlerModule.forRootAsync({
@@ -59,6 +61,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
         UsersRepository,
         UsersQueryRepository,
         // AppConfig, // зарегистрировали этот класс в отдельном глобальном модуле CoreConfig
+        JwtTokenProvider
     ],
     exports: [],
 })

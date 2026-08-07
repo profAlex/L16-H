@@ -5,7 +5,7 @@ import { UsersExternalQueryRepository } from '../../../../user-accounts/infrastr
 import { InjectModel } from '@nestjs/mongoose';
 import { Comment, CommentModelType } from '../../domain/comment.entity';
 import { CommentsCommandRepository } from '../../infrastructure/comments.command-repository';
-import { UserContextDto } from '../../../../authorisation/guards/dto/user-context.dto';
+import { UserAccessTokenContextDto } from '../../../../authorisation/guards/dto/user-access-token-context.dto';
 import { PostsQueryRepository } from '../../../posts/infrastructure/query/posts.query-repository';
 import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-codes';

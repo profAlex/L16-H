@@ -1,10 +1,12 @@
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Injectable } from '@nestjs/common';
-import { UserContextDto } from '../dto/user-context.dto';
+import { UserAccessTokenContextDto } from '../dto/user-access-token-context.dto';
 import { envConfig } from '../../../../config_old';
 import { ConfigService } from '@nestjs/config';
 
+
+// стратегия для проверки эксесс-токена
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     constructor(configService: ConfigService) {
@@ -17,7 +19,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
         })
     }
 
-    async validate(userData: UserContextDto): Promise<UserContextDto> {
+    async validate(userData: UserAccessTokenContextDto): Promise<UserAccessTokenContextDto> {
         return userData;
     }
 }

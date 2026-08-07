@@ -37,7 +37,7 @@ import {
 } from '../../../authorisation/guards/bearer/jwt.auth-guard';
 import { CreateNewComment } from '../../comments/application/usecases/create-new-comment.usecase';
 import { ExtractUserIfExistsFromRequest } from '../../../authorisation/decorators/extract-user-if-exists.decorator';
-import { UserContextDto } from '../../../authorisation/guards/dto/user-context.dto';
+import { UserAccessTokenContextDto } from '../../../authorisation/guards/dto/user-access-token-context.dto';
 import { ChangePostLikeStatusInputDto } from './input-dto/change-post-like-status.input.dto';
 import { ChangePostLikeStatus } from '../application/usecases/change-post-like-status.usecase';
 
@@ -63,7 +63,7 @@ export class PostsController {
     async changePostLikeStatus(
         @Param('postId') postId: string,
         @Body() body: ChangePostLikeStatusInputDto,
-        @ExtractUserIfExistsFromRequest() user: UserContextDto,
+        @ExtractUserIfExistsFromRequest() user: UserAccessTokenContextDto,
     ) {
         return this.commandBus.execute<ChangePostLikeStatus>(
             new ChangePostLikeStatus({
@@ -82,7 +82,7 @@ export class PostsController {
     async getCommentsByPostId(
         @Param('postId') postId: string,
         @Query() query: GetCommentsQueryParams,
-        @ExtractUserIfExistsFromRequest() user: UserContextDto,
+        @ExtractUserIfExistsFromRequest() user: UserAccessTokenContextDto,
     ): Promise<PaginatedViewDto<CommentViewDto>> {
         return this.queryBus.execute<GetCommentsForSpecificPostId>(
             new GetCommentsForSpecificPostId(postId, query, user?.id),
@@ -97,7 +97,7 @@ export class PostsController {
     async createNewComment(
         @Param('postId') postId: string,
         @Body() body: CreateCommentApiInputDto,
-        @ExtractUserIfExistsFromRequest() user: UserContextDto,
+        @ExtractUserIfExistsFromRequest() user: UserAccessTokenContextDto,
     ): Promise<CommentViewDto> {
         return this.commandBus.execute<CreateNewComment>(
             new CreateNewComment(postId, body, user.id),
@@ -111,7 +111,7 @@ export class PostsController {
     @HttpCode(HttpStatus.OK)
     async getAllPosts(
         @Query() query: GetPostsQueryParams,
-        @ExtractUserIfExistsFromRequest() user: UserContextDto,
+        @ExtractUserIfExistsFromRequest() user: UserAccessTokenContextDto,
     ): Promise<PaginatedViewDto<PostViewDto>> {
         return this.queryBus.execute<GetAllPosts>(
             new GetAllPosts(query, user?.id),
@@ -136,7 +136,7 @@ export class PostsController {
     @HttpCode(HttpStatus.OK)
     async getPostById(
         @Param('id') postId: string,
-        @ExtractUserIfExistsFromRequest() user: UserContextDto,
+        @ExtractUserIfExistsFromRequest() user: UserAccessTokenContextDto,
     ): Promise<PostViewDto> {
         // console.log('USER ID: ', user?.id);
         // console.log('POST ID: ', postId);
