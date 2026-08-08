@@ -21,7 +21,7 @@ export class LoginUser extends Command<TokensPair> {
 }
 
 @CommandHandler(LoginUser)
-export class CreateNewCommentHandler implements ICommandHandler<LoginUser> {
+export class LoginUserHandler implements ICommandHandler<LoginUser> {
     constructor(
         // private usersExternalQueryRepository: UsersExternalQueryRepository,
         // private postsQueryRepository: PostsQueryRepository,
@@ -33,8 +33,8 @@ export class CreateNewCommentHandler implements ICommandHandler<LoginUser> {
     async execute({ userId, req }: LoginUser): Promise<TokensPair> {
         // создаем мета данные для сессии
 
-        const deviceName = req.get("User-Agent") || ""; // или req.headers['user-agent'] - обязательно с малыми, т.к. по стандарту http все приводится к строчным. Методы .get и .header же осуществляют приведение к строчным(маленьким) под капотом
-        const deviceIp = req.ip || "";
+        const deviceName = req.get('User-Agent') || ''; // или req.headers['user-agent'] - обязательно с малыми, т.к. по стандарту http все приводится к строчным. Методы .get и .header же осуществляют приведение к строчным(маленьким) под капотом
+        const deviceIp = req.ip || '';
         //
         // // создаем объект сессии
         // const tempSession = new UserSession(
@@ -47,26 +47,34 @@ export class CreateNewCommentHandler implements ICommandHandler<LoginUser> {
         // const sessionExp = tempSession.expiresAt;
         // const sessionDeviceId = tempSession.deviceId;
 
-        const user =
-            await this.usersExternalQueryRepository.getByIdOrNotFoundFail(
-                userId,
-            );
-
-        if (!(await this.postsQueryRepository.ifPostExists(postId))) {
-            throw new DomainException({
-                code: DomainExceptionCode.PostNotFound,
-                message: 'Post not found',
-            });
-        }
-
-        const comment = this.CommentModel.createInstance({
-            relatedPostId: postId,
-            content: body.content,
-            commentatorInfo: { userId: user.id, userLogin: user.login },
+        // создаем сессию
+        const session = this.SessionModel.createInstance({
+            userId: userId,
+            deviceName: deviceName,
+            deviceIp: deviceIp,
         });
 
-        await this.commentsCommandRepository.save(comment);
+        // if (!(await this.postsQueryRepository.ifPostExists(postId))) {
+        //     throw new DomainException({
+        //         code: DomainExceptionCode.PostNotFound,
+        //         message: 'Post not found',
+        //     });
+        // }
 
-        return CommentViewDto.mapToView(comment);
+        // const comment = this.CommentModel.createInstance({
+        //     relatedPostId: postId,
+        //     content: body.content,
+        //     commentatorInfo: { userId: user.id, userLogin: user.login },
+        // });
+
+        await this.sessionsCommandRepository.save(session);
+
+        // создаем пару токенов
+        const tokensPair = await this.jwtTokenProvider.generatePairOfTokens({
+            userId: session.userId,
+            deviceUUID: session.deviceUUID,
+        });
+
+        return tokensPair;
     }
 }

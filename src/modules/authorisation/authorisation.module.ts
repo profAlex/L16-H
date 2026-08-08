@@ -19,6 +19,8 @@ import { AppConfig } from '../../core/app.config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { JwtTokenProvider } from './application/jwt-token-provider/jwt-token-provider.service';
 import { Session, SessionSchema } from './domain/session.entity';
+import { LoginUserHandler } from './application/usecases/login-user.usecase';
+import { SessionsCommandRepository } from './infrastructure/session/sessions.command-repository';
 
 @Module({
     imports: [
@@ -51,6 +53,8 @@ import { Session, SessionSchema } from './domain/session.entity';
     ],
     controllers: [AuthController, SecurityDevicesController],
     providers: [
+        LoginUserHandler,
+        SessionsCommandRepository,
         AuthService,
         // SecurityDevicesQueryRepository,
         LocalStrategy, // Паспортная стратегия для логина
@@ -61,7 +65,7 @@ import { Session, SessionSchema } from './domain/session.entity';
         UsersRepository,
         UsersQueryRepository,
         // AppConfig, // зарегистрировали этот класс в отдельном глобальном модуле CoreConfig
-        JwtTokenProvider
+        JwtTokenProvider,
     ],
     exports: [],
 })

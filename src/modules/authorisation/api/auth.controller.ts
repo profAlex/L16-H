@@ -4,7 +4,8 @@ import {
     Get,
     HttpCode,
     HttpStatus,
-    Post, Req,
+    Post,
+    Req,
     Res,
     UseGuards,
 } from '@nestjs/common';
@@ -23,13 +24,18 @@ import { UserLoginInputDto } from '../../user-accounts/api/input-dto/login-user.
 import { Response, Request } from 'express';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { LoginUser } from '../application/usecases/login-user.usecase';
+import {
+    LoginUser,
+    TokensPair,
+} from '../application/usecases/login-user.usecase';
 
 @Controller('auth')
 export class AuthController {
-    constructor(private authService: AuthService,
-                private readonly commandBus: CommandBus,
-                private readonly queryBus: QueryBus,) {
+    constructor(
+        private authService: AuthService,
+        private readonly commandBus: CommandBus,
+        private readonly queryBus: QueryBus,
+    ) {
         console.log('AuthController created');
     }
 
@@ -46,8 +52,8 @@ export class AuthController {
     ): Promise<{
         accessToken: string;
     }> {
-        const tokensPair = AWAIT?? this.commandBus.execute<LoginUser>(
-            new LoginUser(postId, body, user.id),
+        const tokensPair: TokensPair = await this.commandBus.execute<LoginUser>(
+            new LoginUser(user.id, req),
         );
 
         res.cookie('refreshToken', tokensPair.refreshToken, {
@@ -57,16 +63,7 @@ export class AuthController {
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
-        return this.authService.loginUser(user.id);
-
-
-        //
-        // // здесь логика у нас следующая
-        // // - в любом случае создаем новую сессию со всеми присущими определенными идентификаторами и параметрами
-        //
-        // // создаем сессию в базе
-        // const isSuccessfulSessionCreated =
-        //     await dataCommandRepository.createSession(tempSession);
+        return { accessToken: tokensPair.accessToken };
     }
 
     // Password recovery via Email confirmation. Email should be sent with RecoveryCode inside

@@ -29,7 +29,7 @@ export class Session {
     @Prop({ type: Date, required: true })
     createdAt!: Date;
 
-    @Prop({ type: Date, required: true })
+    @Prop({ type: Date, nullable: true })
     deletedAt!: Date | null;
 
     get id() {
@@ -45,7 +45,7 @@ export class Session {
         session.userId = sessionPayload.userId;
         session.deviceUUID = UUIDGeneratorUtil.generateUUID();
         session.deviceName = sessionPayload.deviceName;
-        session.deviceIP = sessionPayload.deviceIP;
+        session.deviceIP = sessionPayload.deviceIp;
 
         session.issuedAt = new Date();
         session.expiresAt = new Date(
