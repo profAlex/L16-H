@@ -21,6 +21,7 @@ import { JwtTokenProvider } from './application/jwt-token-provider/jwt-token-pro
 import { Session, SessionSchema } from './domain/session.entity';
 import { LoginUserHandler } from './application/usecases/login-user.usecase';
 import { SessionsCommandRepository } from './infrastructure/session/sessions.command-repository';
+import { SessionsQueryRepository } from './infrastructure/session/query/sessions.query-repository';
 
 @Module({
     imports: [
@@ -55,6 +56,7 @@ import { SessionsCommandRepository } from './infrastructure/session/sessions.com
     providers: [
         LoginUserHandler,
         SessionsCommandRepository,
+        SessionsQueryRepository,
         AuthService,
         // SecurityDevicesQueryRepository,
         LocalStrategy, // Паспортная стратегия для логина

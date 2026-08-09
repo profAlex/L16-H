@@ -2,6 +2,14 @@ import { Session, SessionDocument, SessionModelType } from '../../domain/session
 import { InjectModel } from '@nestjs/mongoose';
 import { Injectable } from '@nestjs/common';
 
+export type SessionParameters ={
+    userId: string;
+    deviceUUID: string;
+    expiresAt: Date;
+    issuedAt: Date;
+}
+
+
 @Injectable()
 export class SessionsCommandRepository {
     constructor(

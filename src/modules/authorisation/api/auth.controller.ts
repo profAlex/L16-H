@@ -28,6 +28,8 @@ import {
     LoginUser,
     TokensPair,
 } from '../application/usecases/login-user.usecase';
+import { JwtRefreshAuthGuard } from '../guards/refresh-token/refresh-token.auth-guard';
+import { RefreshToken } from '../application/usecases/refresh-token.usecase';
 
 @Controller('auth')
 export class AuthController {
@@ -45,7 +47,7 @@ export class AuthController {
     @UseGuards(ThrottlerGuard)
     @Post('login')
     async login(
-        @Body() body: UserLoginInputDto,
+        //@Body() body: UserLoginInputDto,
         @ExtractUserIfExistsFromRequest() user: UserAccessTokenContextDto,
         @Res({ passthrough: true }) res: Response,
         @Req() req: Request,
@@ -65,6 +67,35 @@ export class AuthController {
 
         return { accessToken: tokensPair.accessToken };
     }
+
+
+
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(JwtRefreshAuthGuard)
+    @UseGuards(ThrottlerGuard)
+    @Post('refresh-token')
+    async refreshToken(
+        //@Body() body: UserLoginInputDto,
+        @ExtractUserIfExistsFromRequest() user: UserAccessTokenContextDto,
+        @Res({ passthrough: true }) res: Response,
+        @Req() req: Request,
+    ): Promise<{
+        accessToken: string;
+    }> {
+        const tokensPair: TokensPair = await this.commandBus.execute<RefreshToken>(
+            new RefreshToken(user.id, req),
+        );
+
+        res.cookie('refreshToken', tokensPair.refreshToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none',
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+
+        return { accessToken: tokensPair.accessToken };
+    }
+
 
     // Password recovery via Email confirmation. Email should be sent with RecoveryCode inside
     @HttpCode(HttpStatus.NO_CONTENT)
