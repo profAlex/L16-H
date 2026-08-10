@@ -32,6 +32,7 @@ import { JwtRefreshAuthGuard } from '../guards/refresh-token/refresh-token.auth-
 import { RefreshToken } from '../application/usecases/refresh-token.usecase';
 import { CurrentUserMetaData } from '../decorators/extract-meta-data-from-req.decorator';
 import { UserRefreshTokenContextAndMetaDataDto } from '../decorators/dto/user-refresh-token-context-and-meta-data.dto';
+import { Logout } from '../application/usecases/logout.usecase';
 
 @Controller('auth')
 export class AuthController {
@@ -81,7 +82,6 @@ export class AuthController {
         //@Body() body: UserLoginInputDto,
         @CurrentUserMetaData() user: UserRefreshTokenContextAndMetaDataDto,
         @Res({ passthrough: true }) res: Response,
-        @Req() req: Request,
     ): Promise<{
         accessToken: string;
     }> {
@@ -158,6 +158,27 @@ export class AuthController {
     ) {
         return this.authService.resendRegistrationEmail(body.email);
     }
+
+
+    @HttpCode(HttpStatus.NO_CONTENT)
+    @UseGuards(JwtRefreshAuthGuard)
+    @Post('logout')
+    async logout(
+        @CurrentUserMetaData() user: UserRefreshTokenContextAndMetaDataDto,
+        @Res({ passthrough: true }) res: Response,
+    ): Promise<void> {
+        await this.commandBus.execute<Logout>(
+            new Logout(user.sessionId),
+        );
+
+        // очищаем refreshToken в куках браузера
+        res.clearCookie('refreshToken', {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none',
+        });
+    }
+
 
     // Get information about current user
     @HttpCode(HttpStatus.OK)

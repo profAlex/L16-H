@@ -22,6 +22,11 @@ import { Session, SessionSchema } from './domain/session.entity';
 import { LoginUserHandler } from './application/usecases/login-user.usecase';
 import { SessionsCommandRepository } from './infrastructure/session/sessions.command-repository';
 import { SessionsQueryRepository } from './infrastructure/session/query/sessions.query-repository';
+import { RefreshTokenHandler } from './application/usecases/refresh-token.usecase';
+import { LogoutHandler } from './application/usecases/logout.usecase';
+import { BasicAuthStrategy } from './guards/basic/basic.strategy';
+import { JwtRefreshAuthGuard } from './guards/refresh-token/refresh-token.auth-guard';
+import { JwtRefreshTokenStrategy } from './guards/refresh-token/refresh-token.strategy';
 
 @Module({
     imports: [
@@ -55,13 +60,16 @@ import { SessionsQueryRepository } from './infrastructure/session/query/sessions
     controllers: [AuthController, SecurityDevicesController],
     providers: [
         LoginUserHandler,
+        RefreshTokenHandler,
+        LogoutHandler,
         SessionsCommandRepository,
         SessionsQueryRepository,
         AuthService,
         // SecurityDevicesQueryRepository,
         LocalStrategy, // Паспортная стратегия для логина
         JwtStrategy,   // Паспортная стратегия для гвардов
-        // BasicStrategy,
+        BasicAuthStrategy,
+        JwtRefreshTokenStrategy,
         CryptoService,
         UsersService,
         UsersRepository,

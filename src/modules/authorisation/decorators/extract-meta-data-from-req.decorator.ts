@@ -1,6 +1,6 @@
 import { createParamDecorator, ExecutionContext, UnauthorizedException } from '@nestjs/common';
 
-// извлекаем все метаданные из req.user, включая пэйлоад refresh-jwt и id сессии
+// кастомный декоратор в котором извлекаем все метаданные из req.user, включая пэйлоад refresh-jwt и id сессии
 export const CurrentUserMetaData = createParamDecorator(
     (data: unknown, ctx: ExecutionContext) => {
         const request = ctx.switchToHttp().getRequest();

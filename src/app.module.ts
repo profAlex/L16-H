@@ -16,11 +16,12 @@ import { AllHttpExceptionsFilter } from './core/exceptions/filters/all-exception
 import { DomainHttpExceptionsFilter } from './core/exceptions/filters/domain-exceptions.filter';
 import { CqrsModule } from '@nestjs/cqrs';
 import { AppConfig } from './core/app.config';
+import { SecurityDevicesModule } from './modules/security/security.module';
 
 @Module({
     //все модули должны быть заимпортированы в корневой модуль, либо напрямую, либо по цепочке (через другие модули)
     imports: [
-        CqrsModule.forRoot(),
+        CqrsModule.forRoot(), // такое объявление делает его глобальным и шину можно инжектить везде
         MongooseModule.forRootAsync({
             inject: [AppConfig],
             useFactory: async (appConfig: AppConfig) => {
@@ -37,6 +38,7 @@ import { AppConfig } from './core/app.config';
         NotificationsModule,
         configModule,
         CoreModule,
+        SecurityDevicesModule,
     ],
     controllers: [AppController],
     providers: [

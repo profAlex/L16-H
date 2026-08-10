@@ -28,7 +28,7 @@ export class RefreshToken extends Command<TokensPair> {
 }
 
 @CommandHandler(RefreshToken)
-export class LoginUserHandler implements ICommandHandler<RefreshToken> {
+export class RefreshTokenHandler implements ICommandHandler<RefreshToken> {
     constructor(
         // private usersExternalQueryRepository: UsersExternalQueryRepository,
         // private postsQueryRepository: PostsQueryRepository,
