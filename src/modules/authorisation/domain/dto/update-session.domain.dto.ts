@@ -32,3 +32,9 @@ export class UpdateSessionDomainDto {
     @IsNotEmpty()
     expiresAt: Date = new Date(0);
 }
+
+
+export type UpdateSessionDto = {
+    issuedAt: Date;
+    expiresAt: Date;
+}

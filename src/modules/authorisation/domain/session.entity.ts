@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Model } from 'mongoose';
 import { CreateSessionDomainPayload } from './payload/create-session.domain.payload';
-import { UpdateSessionDomainDto } from './dto/update-session.domain.dto';
+import { UpdateSessionDomainDto, UpdateSessionDto } from './dto/update-session.domain.dto';
 import { UUIDGeneratorUtil } from '../../../core/uuid-generation/uuid.service';
 
 export const refreshTokenLifeSpanMinutes = 10;
@@ -18,7 +18,7 @@ export class Session {
     deviceName!: string;
 
     @Prop({ type: String, required: true })
-    deviceIP!: string;
+    deviceIp!: string;
 
     @Prop({ type: Date, required: true })
     issuedAt!: Date;
@@ -45,7 +45,7 @@ export class Session {
         session.userId = sessionPayload.userId;
         session.deviceUUID = UUIDGeneratorUtil.generateUUID();
         session.deviceName = sessionPayload.deviceName;
-        session.deviceIP = sessionPayload.deviceIp;
+        session.deviceIp = sessionPayload.deviceIp;
 
         session.issuedAt = new Date();
         session.expiresAt = new Date(
@@ -65,7 +65,7 @@ export class Session {
         this.deletedAt = new Date();
     }
 
-    updateSession(sessionPayload: UpdateSessionDomainDto) {
+    updateSession(sessionPayload: UpdateSessionDto) {
         if (
             sessionPayload.issuedAt != null &&
             sessionPayload.issuedAt.getTime() > this.issuedAt.getTime()

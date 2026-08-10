@@ -75,6 +75,9 @@ export class LoginUserHandler implements ICommandHandler<LoginUser> {
             deviceUUID: session.deviceUUID,
         });
 
-        return tokensPair;
+        return {
+            accessToken: tokensPair.accessToken,
+            refreshToken: tokensPair.refreshToken,
+        };
     }
 }

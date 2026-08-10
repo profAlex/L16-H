@@ -5,6 +5,7 @@ import { SessionsCommandRepository } from '../../infrastructure/session/sessions
 import { JwtTokenProvider } from '../jwt-token-provider/jwt-token-provider.service';
 import { Response, Request } from 'express';
 import { TokensPair } from './login-user.usecase';
+import { UnauthorizedException } from '@nestjs/common';
 
 // export type TokensPair = {
 //     accessToken: string;
@@ -14,8 +15,13 @@ import { TokensPair } from './login-user.usecase';
 // логиним юзера: а именно - создаем пару токенов и создаем сессию для этого юзера, возвращаем токены
 export class RefreshToken extends Command<TokensPair> {
     constructor(
-        public readonly userId: string,
-        public readonly req: Request,
+        public readonly payload: {
+            userId: string;
+            deviceUUID: string;
+            sessionId: string;
+            issuedAt: Date;
+            expiresAt: Date;
+        },
     ) {
         super();
     }
@@ -31,51 +37,51 @@ export class LoginUserHandler implements ICommandHandler<RefreshToken> {
         private jwtTokenProvider: JwtTokenProvider,
     ) {}
 
-    async execute({ userId, req }: RefreshToken): Promise<TokensPair> {
-        // создаем мета данные для сессии
+    async execute(command: RefreshToken): Promise<TokensPair> {
+        // извлекаем мета данные для сессии
+        const { userId, deviceUUID, sessionId, issuedAt, expiresAt } =
+            command.payload;
 
-        const deviceName = req.get('User-Agent') || ''; // или req.headers['user-agent'] - обязательно с малыми, т.к. по стандарту http все приводится к строчным. Методы .get и .header же осуществляют приведение к строчным(маленьким) под капотом
-        const deviceIp = req.ip || '';
-        //
-        // // создаем объект сессии
-        // const tempSession = new UserSession(
-        //     sessionObjectId,
-        //     user.id,
-        //     deviceName,
-        //     deviceIp,
-        // );
-        // const sessionIat = tempSession.issuedAt;
-        // const sessionExp = tempSession.expiresAt;
-        // const sessionDeviceId = tempSession.deviceId;
+        if (
+            !userId ||
+            !deviceUUID ||
+            !sessionId ||
+            !(issuedAt instanceof Date) ||
+            isNaN(issuedAt.getTime()) ||
+            !(expiresAt instanceof Date) ||
+            isNaN(expiresAt.getTime())
+        ) {
+            throw new UnauthorizedException('Improper refresh token structure');
+        }
 
-        // создаем сессию
-        const session = this.SessionModel.createInstance({
-            userId: userId,
-            deviceName: deviceName,
-            deviceIp: deviceIp,
-        });
+        // находим сессию
+        const sessionDocument =
+            await this.sessionsCommandRepository.findSessionBySessionId(
+                sessionId,
+            );
 
-        // if (!(await this.postsQueryRepository.ifPostExists(postId))) {
-        //     throw new DomainException({
-        //         code: DomainExceptionCode.PostNotFound,
-        //         message: 'Post not found',
-        //     });
-        // }
-
-        // const comment = this.CommentModel.createInstance({
-        //     relatedPostId: postId,
-        //     content: body.content,
-        //     commentatorInfo: { userId: user.id, userLogin: user.login },
-        // });
-
-        await this.sessionsCommandRepository.save(session);
+        if (!sessionDocument) {
+            throw new UnauthorizedException('Session not found');
+        }
 
         // создаем пару токенов
         const tokensPair = await this.jwtTokenProvider.generatePairOfTokens({
-            userId: session.userId,
-            deviceUUID: session.deviceUUID,
+            userId: userId,
+            deviceUUID: deviceUUID,
         });
 
-        return tokensPair;
+        // внутри генератора токенов было рассчиатно и возвращено обновленные время создания и время жизни токена, которые мы запишем в сессию
+        sessionDocument.updateSession({
+            issuedAt: tokensPair.issuedAt,
+            expiresAt: tokensPair.expiresAt,
+        });
+
+        // сохраняем
+        await this.sessionsCommandRepository.save(sessionDocument);
+
+        return {
+            accessToken: tokensPair.accessToken,
+            refreshToken: tokensPair.refreshToken,
+        };
     }
 }

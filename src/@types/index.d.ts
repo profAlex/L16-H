@@ -7,9 +7,11 @@ declare global {
     namespace Express {
         // Внимание: расширяем именно User!
         export interface User {
-            userId: string;
-            deviceId: string;
-            sessionId: ObjectId;
+            userId: string,
+            deviceUUID: string,
+            expiresAt: Date,
+            issuedAt: Date,
+            sessionId: string,
         }
     }
 }

@@ -30,6 +30,8 @@ import {
 } from '../application/usecases/login-user.usecase';
 import { JwtRefreshAuthGuard } from '../guards/refresh-token/refresh-token.auth-guard';
 import { RefreshToken } from '../application/usecases/refresh-token.usecase';
+import { CurrentUserMetaData } from '../decorators/extract-meta-data-from-req.decorator';
+import { UserRefreshTokenContextAndMetaDataDto } from '../decorators/dto/user-refresh-token-context-and-meta-data.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -69,21 +71,28 @@ export class AuthController {
     }
 
 
-
+    // Generate new pair of access and refresh tokens (in cookie client must send
+    // correct refreshToken that will be revoked after refreshing)
+    // Device LastActiveDate should be overridden by issued Date of new refresh token
     @HttpCode(HttpStatus.OK)
     @UseGuards(JwtRefreshAuthGuard)
-    @UseGuards(ThrottlerGuard)
     @Post('refresh-token')
     async refreshToken(
         //@Body() body: UserLoginInputDto,
-        @ExtractUserIfExistsFromRequest() user: UserAccessTokenContextDto,
+        @CurrentUserMetaData() user: UserRefreshTokenContextAndMetaDataDto,
         @Res({ passthrough: true }) res: Response,
         @Req() req: Request,
     ): Promise<{
         accessToken: string;
     }> {
         const tokensPair: TokensPair = await this.commandBus.execute<RefreshToken>(
-            new RefreshToken(user.id, req),
+            new RefreshToken({
+                userId: user.userId,
+                deviceUUID: user.deviceUUID,
+                sessionId: user.sessionId,
+                issuedAt: user.issuedAt,
+                expiresAt: user.expiresAt,
+            }),
         );
 
         res.cookie('refreshToken', tokensPair.refreshToken, {
