@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { BasicStrategy } from 'passport-http';
 import { DomainException } from '../../../../core/exceptions/domain-exceptions';
-import { DomainExceptionCode } from '../../../../core/exceptions/domain-exception-codes'; 
+import { DomainExceptionCode } from '../../../../core/exceptions/domain-exception-codes';
 
 @Injectable()
 export class BasicAuthStrategy extends PassportStrategy(

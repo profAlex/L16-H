@@ -65,7 +65,7 @@ export class AuthController {
             httpOnly: true,
             secure: true,
             sameSite: 'none',
-            maxAge: 7 * 24 * 60 * 60 * 1000,
+            expires: tokensPair.expiresAt,
         });
 
         return { accessToken: tokensPair.accessToken };
@@ -99,7 +99,7 @@ export class AuthController {
             httpOnly: true,
             secure: true,
             sameSite: 'none',
-            maxAge: 7 * 24 * 60 * 60 * 1000,
+            expires: tokensPair.expiresAt,
         });
 
         return { accessToken: tokensPair.accessToken };

@@ -31,6 +31,8 @@ export class JwtTokenProvider {
             const issuedAt = new Date(iat * 1000);
             const expiresAt = new Date(refreshTokenExp * 1000);
 
+            // console.log("---------->", expiresAt);
+
             // записываем
             const accessToken = await this.jwtService.signAsync(
                 {

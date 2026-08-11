@@ -4,10 +4,13 @@ import { InjectModel } from '@nestjs/mongoose';
 import { SessionsCommandRepository } from '../../infrastructure/session/sessions.command-repository';
 import { JwtTokenProvider } from '../jwt-token-provider/jwt-token-provider.service';
 import { Response, Request } from 'express';
+import { UUIDGeneratorUtil } from '../../../../core/uuid-generation/uuid.service';
 
 export type TokensPair = {
     accessToken: string;
     refreshToken: string;
+    issuedAt: Date,
+    expiresAt: Date
 };
 
 // логиним юзера: а именно - создаем пару токенов и создаем сессию для этого юзера, возвращаем токены
@@ -34,26 +37,39 @@ export class LoginUserHandler implements ICommandHandler<LoginUser> {
         // создаем мета данные для сессии
         const deviceName = req.get('User-Agent') || ''; // или req.headers['user-agent'] - обязательно с малыми, т.к. по стандарту http все приводится к строчным. Методы .get и .header же осуществляют приведение к строчным(маленьким) под капотом
         const deviceIp = req.ip || '';
+        const deviceUUID = UUIDGeneratorUtil.generateUUID(); // <--- Единственная генерация UUID!
+
+        // создаем пару токенов
+        const tokensPair = await this.jwtTokenProvider.generatePairOfTokens({
+            userId: userId,
+            deviceUUID: deviceUUID,
+        });
+        // // 1. Сначала рассчитываем временную метку для токенов и сессии
+        // // (или подготавливаем пары дат из JwtTokenProvider)
+        // const tokensPair = await this.jwtTokenProvider.generatePairOfTokens({
+        //     userId: userId,
+        //     deviceUUID: deviceUUID,
+        // });
 
         // создаем сессию
         const session = this.SessionModel.createInstance({
             userId: userId,
             deviceName: deviceName,
             deviceIp: deviceIp,
+            issuedAt: tokensPair.issuedAt,
+            expiresAt: tokensPair.expiresAt,
+            deviceUUID: deviceUUID,
         });
 
         // сохраняем
         await this.sessionsCommandRepository.save(session);
 
-        // создаем пару токенов
-        const tokensPair = await this.jwtTokenProvider.generatePairOfTokens({
-            userId: session.userId,
-            deviceUUID: session.deviceUUID,
-        });
 
         return {
             accessToken: tokensPair.accessToken,
             refreshToken: tokensPair.refreshToken,
+            issuedAt: tokensPair.issuedAt,
+            expiresAt: tokensPair.expiresAt,
         };
     }
 }

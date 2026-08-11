@@ -4,7 +4,7 @@ import { CreateSessionDomainPayload } from './payload/create-session.domain.payl
 import { UpdateSessionDomainDto, UpdateSessionDto } from './dto/update-session.domain.dto';
 import { UUIDGeneratorUtil } from '../../../core/uuid-generation/uuid.service';
 
-export const refreshTokenLifeSpanMinutes = 10;
+// export const refreshTokenLifeSpanMinutes = 10;
 
 @Schema()
 export class Session {
@@ -38,20 +38,22 @@ export class Session {
     }
 
     static createInstance(
-        sessionPayload: CreateSessionDomainPayload,
+        sessionPayload: CreateSessionDomainPayload& {
+            issuedAt: Date;
+            expiresAt: Date;
+            deviceUUID: string,
+        },
     ): SessionDocument {
         const session = new this();
 
         session.userId = sessionPayload.userId;
-        session.deviceUUID = UUIDGeneratorUtil.generateUUID();
+        session.deviceUUID = sessionPayload.deviceUUID ?? UUIDGeneratorUtil.generateUUID();
         session.deviceName = sessionPayload.deviceName;
         session.deviceIp = sessionPayload.deviceIp;
 
-        session.issuedAt = new Date();
-        session.expiresAt = new Date(
-            session.issuedAt.getTime() +
-                refreshTokenLifeSpanMinutes * 60 * 1000,
-        );
+        session.issuedAt = sessionPayload.issuedAt;
+        session.expiresAt = sessionPayload.expiresAt;
+
         session.createdAt = new Date();
         session.deletedAt = null;
 

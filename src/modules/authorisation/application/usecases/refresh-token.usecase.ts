@@ -82,6 +82,8 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshToken> {
         return {
             accessToken: tokensPair.accessToken,
             refreshToken: tokensPair.refreshToken,
+            issuedAt: tokensPair.issuedAt,
+            expiresAt: tokensPair.expiresAt,
         };
     }
 }
