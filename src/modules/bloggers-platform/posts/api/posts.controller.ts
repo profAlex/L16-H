@@ -45,9 +45,6 @@ import { ChangePostLikeStatus } from '../application/usecases/change-post-like-s
 @Controller('posts')
 export class PostsController {
     constructor(
-        private commentsService: CommentsService,
-        private postsService: PostsService,
-        private postsQueryRepository: PostsQueryRepository,
         private readonly commandBus: CommandBus,
         private readonly queryBus: QueryBus,
     ) {

@@ -13,6 +13,11 @@ export type SessionParameters = {
     issuedAt: Date;
 };
 
+type SoftDeleteSessionsParams = {
+    userId: string;
+    sessionId: string;
+};
+
 @Injectable()
 export class SessionsCommandRepository {
     constructor(
@@ -63,7 +68,7 @@ export class SessionsCommandRepository {
     // }
 
     // это более ресурсосберегающий вариант removeAllButOneSession выше, операция без вызова отдельного .makeDeleted и .save(), т.н. атомарная
-    async softDeleteAllButOneSession(sessionId: string, userId: string): Promise<boolean> {
+    async softDeleteAllButOneSession({sessionId, userId}: SoftDeleteSessionsParams): Promise<boolean> {
         const result = await this.SessionModel.updateMany(
             {
                 userId: userId,
