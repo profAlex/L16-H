@@ -20,6 +20,7 @@ import { MeViewDto } from '../../authorisation/api/view-dto/me.view-dto';
 import { DeviceViewDto } from './view-dto/device.view-dto';
 import { GetActiveSessionsList } from '../application/usecases/get-active-sessions-list.usecase';
 import { DeleteAllSessionsButCurrentOne } from '../application/usecases/delete-all-sessions-but-current-one.usecase';
+import { DeleteSessionByDeviceId } from '../application/usecases/delete-session-by-device-id.usecase';
 
 @Controller('security')
 export class SecurityController {
@@ -60,6 +61,6 @@ export class SecurityController {
         @Param('deviceId') deviceId: string,
         @CurrentUserMetaData() user: UserRefreshTokenContextAndMetaDataDto,
     ): Promise<void> {
-        return this.commandBus.execute<DeleteSessionByDeviceId>(new DeleteSessionByDeviceId(id));
+        return this.commandBus.execute<DeleteSessionByDeviceId>(new DeleteSessionByDeviceId(user.userId, user.deviceUUID));
     }
 }

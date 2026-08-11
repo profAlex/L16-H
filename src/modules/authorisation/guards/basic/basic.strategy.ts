@@ -1,15 +1,12 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import {DomainException} from "../../../../core/exceptions/domain-exceptions";
-import {DomainExceptionCode} from "../../../../core/exceptions/domain-exception-codes";
-
-// стратегия для выполнения действий с вводом логина и пароля админа
-const BasicStrategyClass = require('passport-http').Strategy;
+import { BasicStrategy } from 'passport-http';
+import { DomainException } from '../../../../core/exceptions/domain-exceptions';
+import { DomainExceptionCode } from '../../../../core/exceptions/domain-exception-codes'; 
 
 @Injectable()
 export class BasicAuthStrategy extends PassportStrategy(
-    // принудительно приводим к any, чтобы убрать ошибку TS2345 про "missing properties apply, call..."
-    BasicStrategyClass as any,
+    BasicStrategy,
     'basic'
 ) {
     constructor() {
@@ -18,16 +15,15 @@ export class BasicAuthStrategy extends PassportStrategy(
 
     async validate(username: string, password: string): Promise<boolean> {
         const adminUser = 'admin';
-        const adminPass = 'qwerty'; // В проде лучше юзать process.env.BASIC_AUTH_PASS
+        const adminPass = 'qwerty';
 
         if (username !== adminUser || password !== adminPass) {
-            // throw new UnauthorizedException('Invalid basic auth credentials');
             throw new DomainException({
                 code: DomainExceptionCode.Unauthorized,
                 message: 'Invalid basic auth credentials!',
             });
         }
 
-        return true; // юзер успешно авторизован, в req.user запишется true
+        return true;
     }
 }
