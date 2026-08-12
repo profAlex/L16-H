@@ -39,12 +39,12 @@ export class AuthService {
             return null;
         }
 
-        return { id: user.id };
+        return { userId: user.id };
     }
 
     async loginUser(userId: string): Promise<{ accessToken: string }> {
         const accessToken = await this.jwtService.signAsync({
-            id: userId,
+            userId: userId,
         } as UserAccessTokenContextDto);
 
         return { accessToken: accessToken };

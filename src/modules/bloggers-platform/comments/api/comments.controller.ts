@@ -63,7 +63,7 @@ export class CommentsController {
         return this.commandBus.execute<ChangeCommentLikeStatus>(
             new ChangeCommentLikeStatus({
                 commentId: commentId,
-                userId: user.id,
+                userId: user.userId,
                 newLikeStatus: body.likeStatus,
             }),
         );
@@ -79,7 +79,7 @@ export class CommentsController {
     ): Promise<CommentViewDto> {
         const comment = await this.commentsQueryRepository.getCommentById(
             commentId,
-            user?.id,
+            user.userId,
         );
 
         if (!comment) {
@@ -104,7 +104,7 @@ export class CommentsController {
         @ExtractUserIfExistsFromRequest() user: UserAccessTokenContextDto,
     ): Promise<void> {
         return this.commandBus.execute<UpdateCommentById>(
-            new UpdateCommentById(commentId, user.id, body.content),
+            new UpdateCommentById(commentId, user.userId, body.content),
         );
     }
 
@@ -118,7 +118,7 @@ export class CommentsController {
         @ExtractUserIfExistsFromRequest() user: UserAccessTokenContextDto,
     ): Promise<void> {
         return this.commandBus.execute<DeleteCommentById>(
-            new DeleteCommentById(commentId, user.id),
+            new DeleteCommentById(commentId, user.userId),
         );
     }
 }

@@ -58,7 +58,7 @@ export class AuthController {
         accessToken: string;
     }> {
         const tokensPair: TokensPair = await this.commandBus.execute<LoginUser>(
-            new LoginUser(user.id, req),
+            new LoginUser(user.userId, req),
         );
 
         res.cookie('refreshToken', tokensPair.refreshToken, {
@@ -187,6 +187,6 @@ export class AuthController {
     async requestMe(
         @ExtractUserIfExistsFromRequest() user: UserAccessTokenContextDto,
     ): Promise<MeViewDto> {
-        return this.authService.getMeInfo(user.id);
+        return this.authService.getMeInfo(user.userId);
     }
 }

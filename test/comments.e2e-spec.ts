@@ -185,6 +185,7 @@ describe('CommentsController (e2e)', () => {
         // `Bearer ${createAuthLoginResponse.body.accessToken}`
 
         // создаем коммент с использованием bearer-authorisation первого пользователя
+        console.log("ACCESS TOKEN: ", createAuthLoginResponse1.body.accessToken)
         const createCommentResponse = await request(app.getHttpServer())
             .post(`/posts/${createdPost.id}/comments`)
             .set(

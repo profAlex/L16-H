@@ -65,7 +65,7 @@ export class PostsController {
         return this.commandBus.execute<ChangePostLikeStatus>(
             new ChangePostLikeStatus({
                 postId: postId,
-                userId: user.id,
+                userId: user.userId,
                 newLikeStatus: body.likeStatus,
             }),
         );
@@ -82,7 +82,7 @@ export class PostsController {
         @ExtractUserIfExistsFromRequest() user: UserAccessTokenContextDto,
     ): Promise<PaginatedViewDto<CommentViewDto>> {
         return this.queryBus.execute<GetCommentsForSpecificPostId>(
-            new GetCommentsForSpecificPostId(postId, query, user?.id),
+            new GetCommentsForSpecificPostId(postId, query, user?.userId),
         );
     }
 
@@ -97,7 +97,7 @@ export class PostsController {
         @ExtractUserIfExistsFromRequest() user: UserAccessTokenContextDto,
     ): Promise<CommentViewDto> {
         return this.commandBus.execute<CreateNewComment>(
-            new CreateNewComment(postId, body, user.id),
+            new CreateNewComment(postId, body, user.userId),
         );
     }
 
@@ -111,7 +111,7 @@ export class PostsController {
         @ExtractUserIfExistsFromRequest() user: UserAccessTokenContextDto,
     ): Promise<PaginatedViewDto<PostViewDto>> {
         return this.queryBus.execute<GetAllPosts>(
-            new GetAllPosts(query, user?.id),
+            new GetAllPosts(query, user.userId),
         );
     }
 
@@ -139,7 +139,7 @@ export class PostsController {
         // console.log('POST ID: ', postId);
 
         return this.queryBus.execute<GetPostById>(
-            new GetPostById(postId, user?.id),
+            new GetPostById(postId, user.userId),
         );
     }
 

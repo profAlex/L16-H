@@ -1,5 +1,5 @@
 export type UserAccessTokenContextDto = {
-    id: string;
+    userId: string;
 };
 
 
