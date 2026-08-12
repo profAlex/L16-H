@@ -3,9 +3,9 @@ import { Session, SessionModelType } from '../../domain/session.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { SessionsCommandRepository } from '../../infrastructure/session/sessions.command-repository';
 import { JwtTokenProvider } from '../jwt-token-provider/jwt-token-provider.service';
-import { Response, Request } from 'express';
 import { TokensPair } from './login-user.usecase';
-import { UnauthorizedException } from '@nestjs/common';
+import { DomainExceptionCode } from '../../../../core/exceptions/domain-exception-codes';
+import { DomainException } from '../../../../core/exceptions/domain-exceptions';
 
 // export type TokensPair = {
 //     accessToken: string;
@@ -51,7 +51,10 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshToken> {
             !(expiresAt instanceof Date) ||
             isNaN(expiresAt.getTime())
         ) {
-            throw new UnauthorizedException('Improper refresh token structure');
+            throw new DomainException({
+                code: DomainExceptionCode.Unauthorized,
+                message: 'Improper refresh token structure',
+            });
         }
 
         // находим сессию
@@ -61,7 +64,10 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshToken> {
             );
 
         if (!sessionDocument) {
-            throw new UnauthorizedException('Session not found');
+            throw new DomainException({
+                code: DomainExceptionCode.Unauthorized,
+                message: 'Session not found',
+            });
         }
 
         // создаем пару токенов

@@ -6,6 +6,8 @@ import { PostViewDto } from '../../../bloggers-platform/posts/api/view-dto/posts
 import { SessionsQueryRepository } from '../../infrastructure/session/query/sessions.query-repository';
 import { SessionsCommandRepository } from '../../infrastructure/session/sessions.command-repository';
 import { NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { DomainException } from '../../../../core/exceptions/domain-exceptions';
+import { DomainExceptionCode } from '../../../../core/exceptions/domain-exception-codes';
 
 export class Logout extends Command<void> { // This type represents the command execution result
     constructor(
@@ -24,7 +26,10 @@ export class LogoutHandler implements ICommandHandler<Logout> {
     }: Logout): Promise<void> {
         const session = await this.sessionsCommandRepository.findSessionBySessionId(sessionId);
         if (!session) {
-            throw new UnauthorizedException("No such session");
+            throw new DomainException({
+                code: DomainExceptionCode.Unauthorized,
+                message: 'No such session',
+            });
         }
 
         session.makeDeleted();
