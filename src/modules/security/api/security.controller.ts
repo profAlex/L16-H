@@ -61,6 +61,6 @@ export class SecurityController {
         @Param('deviceId') deviceId: string,
         @CurrentUserMetaData() user: UserRefreshTokenContextAndMetaDataDto,
     ): Promise<void> {
-        return this.commandBus.execute<DeleteSessionByDeviceId>(new DeleteSessionByDeviceId(user.userId, user.deviceUUID));
+        return this.commandBus.execute<DeleteSessionByDeviceId>(new DeleteSessionByDeviceId(user.userId, deviceId));
     }
 }
