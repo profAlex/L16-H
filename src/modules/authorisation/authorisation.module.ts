@@ -7,7 +7,6 @@ import {UserAccountsModule} from "../user-accounts/user-accounts.module";
 import {CryptoService} from "../../core/bcrypt/bcrypt.service";
 import {AuthService} from "./application/auth.service";
 import {LocalStrategy} from "./guards/local/local.strategy";
-import {SecurityDevicesController} from "./api/security-devices.controller";
 import {JwtStrategy} from "./guards/bearer/jwt.strategy";
 import {UsersService} from "../user-accounts/application/users.service";
 import {MongooseModule} from "@nestjs/mongoose";
@@ -57,7 +56,9 @@ import { JwtRefreshTokenStrategy } from './guards/refresh-token/refresh-token.st
             ],
         }),
     ],
-    controllers: [AuthController, SecurityDevicesController],
+    controllers: [AuthController,
+        // SecurityDevicesController
+        ],
     providers: [
         LoginUserHandler,
         RefreshTokenHandler,

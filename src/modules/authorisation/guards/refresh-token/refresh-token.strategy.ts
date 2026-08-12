@@ -28,6 +28,13 @@ export class JwtRefreshTokenStrategy extends PassportStrategy(
             jwtFromRequest: ExtractJwt.fromExtractors([
                 (request: Request) => {
                     return request?.cookies?.refreshToken ?? null;
+                    // // для диагностики
+                    // const token = request?.cookies?.refreshToken;
+                    // console.log('--- DEBUG STRATEGY ---');
+                    // console.log('[1] Extracting cookie:');
+                    // console.log('  - All cookies in req:', request?.cookies);
+                    // console.log('  - Extracted refreshToken:', token ? `${token.substring(0, 20)}...` : null);
+                    // return token ?? null;
                 },
             ]),
             ignoreExpiration: false,

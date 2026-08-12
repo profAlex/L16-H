@@ -7,7 +7,7 @@ import { AppConfig } from './core/app.config';
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
 
-    app.use(cookieParser());
+    // app.use(cookieParser()); // перенес в appSetup
     appSetup(app); //глобальные настройки приложения
 
     const appConfig = app.get<AppConfig>(AppConfig); //это способ получить доступ к классу хранящему значения наших переменных окружения

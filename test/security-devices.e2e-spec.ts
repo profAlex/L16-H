@@ -46,7 +46,7 @@ describe('SecurityDevicesController (e2e)', () => {
         jest.restoreAllMocks();
     });
 
-    it('POST /users and POST /auth/login - should return 201 and userview of a created user', async () => {
+    it('GET /security/devices - should return 200 and an array of DeviceViewModel', async () => {
         const user_1 = {
             login: 'qwerty1',
             password: 'lg-988508',
@@ -91,230 +91,120 @@ describe('SecurityDevicesController (e2e)', () => {
         expect(refreshTokenCookie).toBeDefined();
         expect(refreshTokenCookie).toContain('refreshToken=');
         expect(refreshTokenCookie).toContain('HttpOnly');
+
+        // const cleanCookie = refreshTokenCookie.split(';')[0];
+
+        // запрос на эндпоинт /security/devices с передачей куки
+        const devicesResponse = await request(app.getHttpServer())
+            .get('/security/devices')
+            .set('Cookie', refreshTokenCookie)
+            .expect(200);
+
+
+        // Проверяем, что в теле пришел массив устройств
+        expect(Array.isArray(devicesResponse.body)).toBe(true);
+        expect(devicesResponse.body).toHaveLength(1);
+
+        // Проверяем структуру элементов массива (DeviceViewModel)
+        expect(devicesResponse.body[0]).toEqual({
+            ip: expect.any(String),
+            title: expect.any(String), // User-Agent / deviceName
+            lastActiveDate: expect.any(String),
+            deviceId: expect.any(String),
+        });
     });
 
-    it('POST /auth/registration - should return status 204 and create new user and send confirmation email with code', async () => {
+
+    it('GET /security/devices - multiple devices logged in from single user, should return 200 and an array of DeviceViewModel', async () => {
         const user_1 = {
             login: 'qwerty1',
             password: 'lg-988508',
             email: 'example@example.dev',
         };
+        const login = 'admin';
+        const password = 'qwerty';
+        const authHeader =
+            'Basic ' + Buffer.from(`${login}:${password}`).toString('base64');
 
-        await request(app.getHttpServer())
-            .post('/auth/registration')
+        const createUserResponse = await request(app.getHttpServer())
+            .post('/users')
+            .set('Authorization', authHeader)
             .send(user_1)
-            .expect(204);
+            .expect(201);
 
-        expect(sendConfirmationEmailSpy).toHaveBeenCalledTimes(1);
-        expect(sendConfirmationEmailSpy.mock.calls[0][0]).toBe(user_1.email);
-    });
+        expect(createUserResponse.body).toEqual({
+            id: expect.any(String),
+            login: user_1.login,
+            email: user_1.email,
+            createdAt: expect.any(String),
+        });
 
-    it('POST /auth/registration - should return status 400 while trying to register user with same email', async () => {
-        const user_1 = {
-            login: 'qwerty1',
-            password: 'lg-988508',
-            email: 'example@example.dev',
-        };
+        const createAuthLoginResponse = await request(app.getHttpServer())
+            .post('/auth/login')
+            .send({ loginOrEmail: user_1.login, password: user_1.password })
+            .expect(200);
 
-        const user_2 = {
-            login: 'qwerty2',
-            password: 'lg-988508_',
-            email: 'example@example.dev',
-        };
-
-        await request(app.getHttpServer())
-            .post('/auth/registration')
-            .send(user_1)
-            .expect(204);
-
-        expect(sendConfirmationEmailSpy).toHaveBeenCalledTimes(1);
-        expect(sendConfirmationEmailSpy.mock.calls[0][0]).toBe(user_1.email);
-
-        await request(app.getHttpServer())
-            .post('/auth/registration')
-            .send(user_2)
-            .expect(400);
-
-        expect(sendConfirmationEmailSpy).toHaveBeenCalledTimes(1);
-    });
-
-    it('POST /auth/registration-email-resending - status 204, should send email with new code if user exists but not confirmed yet', async () => {
-        const user_1 = {
-            login: 'qwerty1',
-            password: 'lg-988508',
-            email: 'example@example.dev',
-        };
-
-        const user_1_resending = {
-            email: 'example@example.dev',
-        };
-
-        await request(app.getHttpServer())
-            .post('/auth/registration')
-            .send(user_1)
-            .expect(204);
-
-        expect(sendConfirmationEmailSpy).toHaveBeenCalledTimes(1);
-        expect(sendConfirmationEmailSpy.mock.calls[0][0]).toBe(user_1.email);
-
-        await request(app.getHttpServer())
-            .post('/auth/registration-email-resending')
-            .send(user_1_resending)
-            .expect(204);
-
-        expect(sendConfirmationEmailSpy).toHaveBeenCalledTimes(2);
-        expect(sendConfirmationEmailSpy.mock.calls[1][0]).toBe(user_1.email);
-    });
-
-    it('POST /auth/registration-confirmation - status 204, should confirm registration by email', async () => {
-        const user_1 = {
-            login: 'qwerty1',
-            password: 'lg-988508',
-            email: 'example@example.dev',
-        };
-
-        await request(app.getHttpServer())
-            .post('/auth/registration')
-            .send(user_1)
-            .expect(204);
-
-        expect(sendConfirmationEmailSpy).toHaveBeenCalledTimes(1);
-        expect(sendConfirmationEmailSpy.mock.calls[0][0]).toBe(user_1.email);
-        expect(sendConfirmationEmailSpy.mock.calls[0][1]).toStrictEqual(
+        expect(createAuthLoginResponse.body.accessToken).toBeDefined();
+        expect(createAuthLoginResponse.body.accessToken).toEqual(
             expect.any(String),
         );
 
-        const userConfirmationCode = {
-            code: sendConfirmationEmailSpy.mock.calls[0][1],
-        };
+        expect(createAuthLoginResponse.headers['set-cookie']).toBeDefined();
 
-        await request(app.getHttpServer())
-            .post('/auth/registration-confirmation')
-            .send(userConfirmationCode)
-            .expect(204);
+        const rawCookies = createAuthLoginResponse.headers['set-cookie'];
+        const cookies = Array.isArray(rawCookies) ? rawCookies : [rawCookies];
+        const refreshTokenCookie = cookies.find((cookie) =>
+            cookie.includes('refreshToken'),
+        );
 
-        await request(app.getHttpServer())
-            .post('/auth/login')
-            .send({ loginOrEmail: user_1.login, password: user_1.password })
-            .expect(200);
-    });
+        expect(refreshTokenCookie).toBeDefined();
+        expect(refreshTokenCookie).toContain('refreshToken=');
+        expect(refreshTokenCookie).toContain('HttpOnly');
 
-    it('POST /auth/registration-confirmation - status 400, should return error if code already confirmed', async () => {
-        const user_1 = {
-            login: 'qwerty1',
-            password: 'lg-988508',
-            email: 'example@example.dev',
-        };
 
-        const res = await request(app.getHttpServer())
-            .post('/auth/registration')
-            .send(user_1)
-            .expect(204);
-
-        // if (res.status === 500) {
-        //     console.log('РЕАЛЬНАЯ ОШИБКА 500:', res.body);
-        // }
-
-        expect(sendConfirmationEmailSpy).toHaveBeenCalledTimes(1);
-
-        const userConfirmationCode = {
-            code: sendConfirmationEmailSpy.mock.calls[0][1],
-        };
-
-        await request(app.getHttpServer())
-            .post('/auth/registration-confirmation')
-            .send(userConfirmationCode)
-            .expect(204);
-
-        await request(app.getHttpServer())
+        // логиним юзера второй раз
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        const createAuthLoginResponse1 = await request(app.getHttpServer())
             .post('/auth/login')
             .send({ loginOrEmail: user_1.login, password: user_1.password })
             .expect(200);
 
-        await request(app.getHttpServer())
-            .post('/auth/registration-confirmation')
-            .send(userConfirmationCode)
-            .expect(400);
-    });
+        expect(createAuthLoginResponse1.body.accessToken).toBeDefined();
+        expect(createAuthLoginResponse1.body.accessToken).toEqual(
+            expect.any(String),
+        );
 
-    it('POST /auth/registration-email-resending - status 400, should return error if email already confirmed', async () => {
-        const user_1 = {
-            login: 'qwerty1',
-            password: 'lg-988508',
-            email: 'example@example.dev',
-        };
+        expect(createAuthLoginResponse1.headers['set-cookie']).toBeDefined();
 
-        await request(app.getHttpServer())
-            .post('/auth/registration')
-            .send(user_1)
-            .expect(204);
+        // const rawCookies1 = createAuthLoginResponse1.headers['set-cookie'];
+        // const cookies1 = Array.isArray(rawCookies) ? rawCookies : [rawCookies];
+        // const refreshTokenCookie1 = cookies.find((cookie) =>
+        //     cookie.includes('refreshToken'),
+        // );
 
-        expect(sendConfirmationEmailSpy).toHaveBeenCalledTimes(1);
 
-        const userConfirmationCode = {
-            code: sendConfirmationEmailSpy.mock.calls[0][1],
-        };
 
-        await request(app.getHttpServer())
-            .post('/auth/registration-confirmation')
-            .send(userConfirmationCode)
-            .expect(204);
 
-        const user_1_resending = {
-            email: 'example@example.dev',
-        };
 
-        await request(app.getHttpServer())
-            .post('/auth/registration-email-resending')
-            .send(user_1_resending)
-            .expect(400);
-    });
+        // const cleanCookie = refreshTokenCookie.split(';')[0];
 
-    it('POST /auth/registration-confirmation - status 400, should return error if code doesnt exist', async () => {
-        const user_1 = {
-            login: 'qwerty1',
-            password: 'lg-988508',
-            email: 'example@example.dev',
-        };
+        // запрос на эндпоинт /security/devices с передачей куки
+        const devicesResponse = await request(app.getHttpServer())
+            .get('/security/devices')
+            .set('Cookie', refreshTokenCookie)
+            .expect(200);
 
-        await request(app.getHttpServer())
-            .post('/auth/registration')
-            .send(user_1)
-            .expect(204);
 
-        expect(sendConfirmationEmailSpy).toHaveBeenCalledTimes(1);
+        // Проверяем, что в теле пришел массив устройств
+        expect(Array.isArray(devicesResponse.body)).toBe(true);
+        expect(devicesResponse.body).toHaveLength(2);
 
-        const userConfirmationCode = {
-            code: 'not existing code',
-        };
-
-        await request(app.getHttpServer())
-            .post('/auth/registration-confirmation')
-            .send(userConfirmationCode)
-            .expect(400);
-    });
-
-    it('POST /auth/registration-email-resending - status 400, should return error if user email doesnt exist', async () => {
-        const user_1 = {
-            login: 'qwerty1',
-            password: 'lg-988508',
-            email: 'example@example.dev',
-        };
-
-        await request(app.getHttpServer())
-            .post('/auth/registration')
-            .send(user_1)
-            .expect(204);
-
-        expect(sendConfirmationEmailSpy).toHaveBeenCalledTimes(1);
-
-        const user_1_resending = {
-            email: 'non_existing@example.dev',
-        };
-
-        await request(app.getHttpServer())
-            .post('/auth/registration-email-resending')
-            .send(user_1_resending)
-            .expect(400);
+        // Проверяем структуру элементов массива (DeviceViewModel)
+        expect(devicesResponse.body[0]).toEqual({
+            ip: expect.any(String),
+            title: expect.any(String), // User-Agent / deviceName
+            lastActiveDate: expect.any(String),
+            deviceId: expect.any(String),
+        });
     });
 });

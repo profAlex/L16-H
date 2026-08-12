@@ -1,6 +1,5 @@
 import { MongooseModule } from '@nestjs/mongoose';
 import { Module } from '@nestjs/common';
-import { SecurityDevicesController } from '../authorisation/api/security-devices.controller';
 import { Session, SessionSchema } from '../authorisation/domain/session.entity';
 import { JwtRefreshTokenStrategy } from '../authorisation/guards/refresh-token/refresh-token.strategy';
 import { SessionsCommandRepository } from '../authorisation/infrastructure/session/sessions.command-repository';
@@ -10,12 +9,13 @@ import {
     DeleteAllSessionsButCurrentOneHandler
 } from './application/usecases/delete-all-sessions-but-current-one.usecase';
 import { DeleteSessionByDeviceIdHandler } from './application/usecases/delete-session-by-device-id.usecase';
+import { SecurityController } from './api/security.controller';
 
 @Module({
     imports: [
         MongooseModule.forFeature([{ name: Session.name, schema: SessionSchema }]),
     ],
-    controllers: [SecurityDevicesController],
+    controllers: [SecurityController],
     providers: [
         DeleteSessionByDeviceIdHandler,
         DeleteAllSessionsButCurrentOneHandler,
