@@ -6,6 +6,7 @@ import request from 'supertest';
 import { Model } from 'mongoose';
 import { getModelToken } from '@nestjs/mongoose';
 import { Comment } from '../src/modules/bloggers-platform/comments/domain/comment.entity';
+import { ThrottlerGuard } from '@nestjs/throttler';
 
 describe('PostsController (e2e)', () => {
     let app: INestApplication;
@@ -14,8 +15,12 @@ describe('PostsController (e2e)', () => {
     beforeAll(async () => {
         const testingAppModule: TestingModule = await Test.createTestingModule({
             imports: [AppModule],
-        }).compile();
-
+        })
+            .overrideGuard(ThrottlerGuard) // отключаем троттлер, т.к. он запарывает тесты изза обращения к логину пользователя слишком часто
+            .useValue({
+                canActivate: () => true, // Разрешаем абсолютно любые запросы без ограничений
+            })
+            .compile();
         app = testingAppModule.createNestApplication();
         appSetup(app); // не забываем подключить глобальные префиксы, пайпы
         await app.init();
@@ -767,11 +772,17 @@ describe('PostsController (e2e)', () => {
             createdAt: expect.any(String),
         });
 
+        // задержка иначе сработает троттлер, который надо бы отключить в beforeAll
+        // ОТКЛЮЧИЛ
+        // await new Promise((resolve) => setTimeout(resolve, 10000));
+
         // логиним созданного юзера
         const createAuthLoginResponse = await request(app.getHttpServer())
             .post('/auth/login')
             .send({ loginOrEmail: user_1.login, password: user_1.password })
             .expect(200);
+        // console.log('LOGIN STATUS:', createAuthLoginResponse.status);
+        // console.log('LOGIN BODY:', createAuthLoginResponse.body);
 
         // {
         //     "accessToken" : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMWM1YWM4ODdiNmFiNTlhYjg2ZDFmMiIsImlhdCI6MTc4MDI0MzE0NiwiZXhwIjoxNzgwMjQ2NzQ2fQ.jDyTdoIO-_KcGpM3pEQsDWvPLiME2TscR_7UK0H2-qk"
@@ -880,5 +891,5 @@ describe('PostsController (e2e)', () => {
 
         // т.к. обращались как залогиненый юзер то должен быть Like
         expect(resultWithToken.body.extendedLikesInfo.myStatus).toEqual('Like');
-    });
+    }, 15000);
 });

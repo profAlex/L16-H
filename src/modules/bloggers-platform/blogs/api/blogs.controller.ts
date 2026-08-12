@@ -97,7 +97,7 @@ export class BlogsController {
         @ExtractUserIfExistsFromRequest() user: UserAccessTokenContextDto,
     ): Promise<PaginatedViewDto<PostViewDto>> {
         return this.postsService.getPostsByBlogId({
-            userId: user.userId,
+            userId: user?.userId,
             blogId: blogId,
             query: query,
         });

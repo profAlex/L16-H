@@ -111,7 +111,7 @@ export class PostsController {
         @ExtractUserIfExistsFromRequest() user: UserAccessTokenContextDto,
     ): Promise<PaginatedViewDto<PostViewDto>> {
         return this.queryBus.execute<GetAllPosts>(
-            new GetAllPosts(query, user.userId),
+            new GetAllPosts(query, user?.userId),
         );
     }
 
@@ -139,7 +139,7 @@ export class PostsController {
         // console.log('POST ID: ', postId);
 
         return this.queryBus.execute<GetPostById>(
-            new GetPostById(postId, user.userId),
+            new GetPostById(postId, user?.userId),
         );
     }
 
