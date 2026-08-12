@@ -1,7 +1,7 @@
 import {
   ArgumentsHost,
   Catch,
-  ExceptionFilter,
+  ExceptionFilter, HttpException,
   HttpStatus,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
@@ -17,6 +17,20 @@ export class AllHttpExceptionsFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
+
+    if (exception instanceof HttpException) {
+      const status = exception.getStatus(); // Получаем честный статус (например, 429)
+
+      // Возвращаем родной статус с понятным сообщением
+      response.status(status).json({
+        timestamp: new Date().toISOString(),
+        path: request.url,
+        message: exception.message || 'Too Many Requests',
+        extensions: [],
+        code: status, // Идемпотентно передаем статус ответа
+      });
+      return;
+    }
 
     //Если сработал этот фильтр, то пользователю улетит 500я ошибка
     const message = exception.message || 'Unknown exception occurred.';
