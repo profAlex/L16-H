@@ -48,8 +48,8 @@ export class AuthController {
     // Try login user to the system
     @HttpCode(HttpStatus.OK)
     @UseGuards(LocalAuthGuard)
-    @UseGuards(ThrottlerGuard)
-    // @UseGuards(CustomThrottlerGuard)
+    // @UseGuards(ThrottlerGuard)
+    @UseGuards(CustomThrottlerGuard)
     @Post('login')
     async login(
         //@Body() body: UserLoginInputDto,
