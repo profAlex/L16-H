@@ -3,6 +3,7 @@ import { Session, SessionModelType } from '../../../domain/session.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { SessionParameters } from '../sessions.command-repository';
 import { DeviceViewDto } from '../../../../security/api/view-dto/device.view-dto';
+import { FlattenMaps } from 'mongoose';
 
 @Injectable()
 export class SessionsQueryRepository {
@@ -31,14 +32,14 @@ export class SessionsQueryRepository {
         return session ? session._id.toString() : null;
     }
 
-    async getActiveSessionList(userId: string): Promise<Session[]> {
+    async getActiveSessionList(userId: string): Promise<FlattenMaps<Session>[]> {
         const currentDate = new Date();
         return this.SessionModel.find({
             userId: userId,
             deletedAt: null,
             expiresAt: { $gt: currentDate },
         })
-            .lean<Session[]>()
+            .lean<FlattenMaps<Session>[]>()
             .exec();
     }
 }

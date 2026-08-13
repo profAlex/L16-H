@@ -1,5 +1,13 @@
 import { Session } from '../../../authorisation/domain/session.entity';
 import { InternalServerErrorException } from '@nestjs/common';
+import { FlattenMaps } from 'mongoose';
+
+
+export type ToLean<T> = {
+    [K in keyof FlattenMaps<T>]: FlattenMaps<T>[K] extends Date
+        ? Date | string
+        : FlattenMaps<T>[K];
+};
 
 export class DeviceViewDto {
     ip: string;
@@ -8,7 +16,7 @@ export class DeviceViewDto {
     lastActiveDate: string; //token's issueddAt field
     deviceId: string;
 
-    constructor(session: Session) {
+    constructor(session: FlattenMaps<Session>) {
         this.ip = session.deviceIp;
         this.title = session.deviceName;
 
@@ -20,12 +28,12 @@ export class DeviceViewDto {
             );
         }
 
-        this.lastActiveDate = issuedAtDate.toISOString();
-        // this.lastActiveDate = session.issuedAt.toISOString();
+        // this.lastActiveDate = issuedAtDate.toISOString();
+        this.lastActiveDate = session.issuedAt.toISOString();
         this.deviceId = session.deviceUUID;
     }
 
-    static mapToView(session: Session): DeviceViewDto {
+    static mapToView(session: FlattenMaps<Session>): DeviceViewDto {
         return new DeviceViewDto(session);
     }
 }
