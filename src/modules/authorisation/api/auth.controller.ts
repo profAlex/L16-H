@@ -33,6 +33,7 @@ import { RefreshToken } from '../application/usecases/refresh-token.usecase';
 import { CurrentUserMetaData } from '../decorators/extract-meta-data-from-req.decorator';
 import { UserRefreshTokenContextAndMetaDataDto } from '../decorators/dto/user-refresh-token-context-and-meta-data.dto';
 import { Logout } from '../application/usecases/logout.usecase';
+import { CustomThrottlerGuard } from '../guards/custom-throttler/custom-throttler.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -47,7 +48,8 @@ export class AuthController {
     // Try login user to the system
     @HttpCode(HttpStatus.OK)
     @UseGuards(LocalAuthGuard)
-    @UseGuards(ThrottlerGuard)
+    // @UseGuards(ThrottlerGuard)
+    @UseGuards(CustomThrottlerGuard)
     @Post('login')
     async login(
         //@Body() body: UserLoginInputDto,
@@ -64,7 +66,8 @@ export class AuthController {
         res.cookie('refreshToken', tokensPair.refreshToken, {
             httpOnly: true,
             secure: true,
-            sameSite: 'none',
+            // sameSite: 'none',
+            path: '/',
             expires: tokensPair.expiresAt,
         });
 
@@ -98,7 +101,8 @@ export class AuthController {
         res.cookie('refreshToken', tokensPair.refreshToken, {
             httpOnly: true,
             secure: true,
-            sameSite: 'none',
+            // sameSite: 'none',
+            path: '/',
             expires: tokensPair.expiresAt,
         });
 
@@ -108,7 +112,8 @@ export class AuthController {
 
     // Password recovery via Email confirmation. Email should be sent with RecoveryCode inside
     @HttpCode(HttpStatus.NO_CONTENT)
-    @UseGuards(ThrottlerGuard)
+    // @UseGuards(ThrottlerGuard)
+    @UseGuards(CustomThrottlerGuard)
     @Post('password-recovery')
     async passwordRecovery(
         @Body() body: PasswordRecoveryInputDto,
@@ -118,7 +123,8 @@ export class AuthController {
 
     // Confirm Password recovery
     @HttpCode(HttpStatus.NO_CONTENT)
-    @UseGuards(ThrottlerGuard)
+    // @UseGuards(ThrottlerGuard)
+    @UseGuards(CustomThrottlerGuard)
     @Post('new-password')
     async newPassword(@Body() body: NewPasswordInputDto): Promise<void> {
         return this.authService.applyNewPassword(
@@ -129,7 +135,8 @@ export class AuthController {
 
     // Confirm registration
     @HttpCode(HttpStatus.NO_CONTENT)
-    @UseGuards(ThrottlerGuard)
+    // @UseGuards(ThrottlerGuard)
+    @UseGuards(CustomThrottlerGuard)
     @Post('registration-confirmation')
     async registrationConfirmation(
         @Body() body: RegistrationConfirmationInputDto,
@@ -139,7 +146,8 @@ export class AuthController {
 
     // Registration in the system. Email with confirmation code will be send to passed email address
     @HttpCode(HttpStatus.NO_CONTENT)
-    @UseGuards(ThrottlerGuard)
+    // @UseGuards(ThrottlerGuard)
+    @UseGuards(CustomThrottlerGuard)
     @Post('registration')
     async registration(@Body() body: RegisterNewUserDto): Promise<void> {
         return this.authService.registerAttempt(
@@ -151,7 +159,8 @@ export class AuthController {
 
     // Resend confirmation registration Email if user exists
     @HttpCode(HttpStatus.NO_CONTENT)
-    @UseGuards(ThrottlerGuard)
+    // @UseGuards(ThrottlerGuard)
+    @UseGuards(CustomThrottlerGuard)
     @Post('registration-email-resending')
     async registrationEmailResending(
         @Body() body: RegistrationEmailResendingInputDto,
@@ -175,7 +184,8 @@ export class AuthController {
         res.clearCookie('refreshToken', {
             httpOnly: true,
             secure: true,
-            sameSite: 'none',
+            // sameSite: 'none',
+            path: '/',
         });
     }
 
