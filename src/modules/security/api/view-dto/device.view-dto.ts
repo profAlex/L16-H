@@ -2,7 +2,9 @@ import { Session } from '../../../authorisation/domain/session.entity';
 import { InternalServerErrorException } from '@nestjs/common';
 import { FlattenMaps } from 'mongoose';
 
-
+// вспомогательная утилита, заменяющая простой Date на Date|string, чтобы нельзя было применить
+// методы например toISOString там где теоретически может прилететь простой string
+// и поймать undefined. т.е. это защита от дурака такая
 export type ToLean<T> = {
     [K in keyof FlattenMaps<T>]: FlattenMaps<T>[K] extends Date
         ? Date | string
@@ -16,7 +18,7 @@ export class DeviceViewDto {
     lastActiveDate: string; //token's issueddAt field
     deviceId: string;
 
-    constructor(session: FlattenMaps<Session>) {
+    constructor(session: ToLean<Session>) {
         this.ip = session.deviceIp;
         this.title = session.deviceName;
 
@@ -28,12 +30,12 @@ export class DeviceViewDto {
             );
         }
 
-        // this.lastActiveDate = issuedAtDate.toISOString();
-        this.lastActiveDate = session.issuedAt.toISOString();
+        this.lastActiveDate = issuedAtDate.toISOString();
+        // this.lastActiveDate = session.issuedAt.toISOString();
         this.deviceId = session.deviceUUID;
     }
 
-    static mapToView(session: FlattenMaps<Session>): DeviceViewDto {
+    static mapToView(session: ToLean<Session>): DeviceViewDto {
         return new DeviceViewDto(session);
     }
 }
