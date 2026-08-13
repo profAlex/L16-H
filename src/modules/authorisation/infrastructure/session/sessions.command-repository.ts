@@ -9,7 +9,7 @@ import { Types } from 'mongoose';
 
 export type SessionParameters = {
     userId: string;
-    deviceUUID: string;
+    deviceId: string;
     expiresAt: Date;
     issuedAt: Date;
 };

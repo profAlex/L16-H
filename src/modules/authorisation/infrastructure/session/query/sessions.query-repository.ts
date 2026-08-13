@@ -12,15 +12,16 @@ export class SessionsQueryRepository {
 
     async checkIfSessionExists({
         userId,
-        deviceUUID,
+        deviceId,
         expiresAt,
         issuedAt,
     }: SessionParameters): Promise<string | null> {
         const session = await this.SessionModel.findOne(
             {
                 userId: userId,
-                deviceUUID: deviceUUID,
-                expiresAt: expiresAt,
+                deviceUUID: deviceId,
+                // expiresAt: expiresAt,
+                expiresAt: { $gt: new Date() },
                 issuedAt: issuedAt,
                 deletedAt: null,
             },

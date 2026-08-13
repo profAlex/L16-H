@@ -8,12 +8,12 @@ import { Request } from 'express';
 import { SessionParameters } from '../../infrastructure/session/sessions.command-repository';
 import { SessionsQueryRepository } from '../../infrastructure/session/query/sessions.query-repository';
 
-export type RefreshTokenPayload = {
-    userId: string;
-    deviceUUID: string;
-    exp: number;
-    iat: number;
-};
+// export type RefreshTokenPayload = {
+//     userId: string;
+//     deviceUUID: string;
+//     exp: number;
+//     iat: number;
+// };
 
 @Injectable()
 export class JwtRefreshTokenStrategy extends PassportStrategy(
@@ -48,7 +48,7 @@ export class JwtRefreshTokenStrategy extends PassportStrategy(
         if (
             !payload ||
             typeof payload.userId !== 'string' ||
-            typeof payload.deviceUUID !== 'string' ||
+            typeof payload.deviceId !== 'string' ||
             typeof payload.iat !== 'number' ||
             typeof payload.exp !== 'number'
         ) {
@@ -64,7 +64,7 @@ export class JwtRefreshTokenStrategy extends PassportStrategy(
         const sessionId =
             await this.sessionsQueryRepository.checkIfSessionExists({
                 userId: payload.userId,
-                deviceUUID: payload.deviceUUID,
+                deviceId: payload.deviceId,
                 expiresAt: expiresAt,
                 issuedAt: issuedAt,
             });
@@ -75,7 +75,7 @@ export class JwtRefreshTokenStrategy extends PassportStrategy(
 
         return {
             userId: payload.userId,
-            deviceUUID: payload.deviceUUID,
+            deviceId: payload.deviceId,
             expiresAt: expiresAt,
             issuedAt: issuedAt,
             sessionId: sessionId,
