@@ -36,7 +36,8 @@ export class LoginUserHandler implements ICommandHandler<LoginUser> {
     async execute({ userId, req }: LoginUser): Promise<TokensPair> {
         // создаем мета данные для сессии
         const deviceName = req.get('User-Agent') || 'unknown device'; // или req.headers['user-agent'] - обязательно с малыми, т.к. по стандарту http все приводится к строчным. Методы .get и .header же осуществляют приведение к строчным(маленьким) под капотом
-        const deviceIp = req.ip || 'unknown ip';
+        // const deviceIp = req.ip || 'unknown ip';
+        const deviceIp = req.ip || req.headers['x-forwarded-for']?.toString() || 'unknown ip';
         const deviceUUID = UUIDGeneratorUtil.generateUUID();
 
         // создаем пару токенов

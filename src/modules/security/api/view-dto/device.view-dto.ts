@@ -20,7 +20,8 @@ export class DeviceViewDto {
             );
         }
 
-        this.lastActiveDate = session.issuedAt.toISOString();
+        this.lastActiveDate = issuedAtDate.toISOString();
+        // this.lastActiveDate = session.issuedAt.toISOString();
         this.deviceId = session.deviceUUID;
     }
 
