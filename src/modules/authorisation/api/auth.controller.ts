@@ -74,7 +74,6 @@ export class AuthController {
         return { accessToken: tokensPair.accessToken };
     }
 
-
     // Generate new pair of access and refresh tokens (in cookie client must send
     // correct refreshToken that will be revoked after refreshing)
     // Device LastActiveDate should be overridden by issued Date of new refresh token
@@ -88,15 +87,16 @@ export class AuthController {
     ): Promise<{
         accessToken: string;
     }> {
-        const tokensPair: TokensPair = await this.commandBus.execute<RefreshToken>(
-            new RefreshToken({
-                userId: user.userId,
-                deviceUUID: user.deviceUUID,
-                sessionId: user.sessionId,
-                issuedAt: user.issuedAt,
-                expiresAt: user.expiresAt,
-            }),
-        );
+        const tokensPair: TokensPair =
+            await this.commandBus.execute<RefreshToken>(
+                new RefreshToken({
+                    userId: user.userId,
+                    deviceId: user.deviceId,
+                    sessionId: user.sessionId,
+                    issuedAt: user.issuedAt,
+                    expiresAt: user.expiresAt,
+                }),
+            );
 
         res.cookie('refreshToken', tokensPair.refreshToken, {
             httpOnly: true,
@@ -108,7 +108,6 @@ export class AuthController {
 
         return { accessToken: tokensPair.accessToken };
     }
-
 
     // Password recovery via Email confirmation. Email should be sent with RecoveryCode inside
     @HttpCode(HttpStatus.NO_CONTENT)
@@ -168,7 +167,6 @@ export class AuthController {
         return this.authService.resendRegistrationEmail(body.email);
     }
 
-
     @HttpCode(HttpStatus.NO_CONTENT)
     @UseGuards(JwtRefreshAuthGuard)
     @Post('logout')
@@ -176,9 +174,7 @@ export class AuthController {
         @CurrentUserMetaData() user: UserRefreshTokenContextAndMetaDataDto,
         @Res({ passthrough: true }) res: Response,
     ): Promise<void> {
-        await this.commandBus.execute<Logout>(
-            new Logout(user.sessionId),
-        );
+        await this.commandBus.execute<Logout>(new Logout(user.sessionId));
 
         // очищаем refreshToken в куках браузера
         res.clearCookie('refreshToken', {
@@ -188,7 +184,6 @@ export class AuthController {
             path: '/',
         });
     }
-
 
     // Get information about current user
     @HttpCode(HttpStatus.OK)

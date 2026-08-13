@@ -17,7 +17,7 @@ export class RefreshToken extends Command<TokensPair> {
     constructor(
         public readonly payload: {
             userId: string;
-            deviceUUID: string;
+            deviceId: string;
             sessionId: string;
             issuedAt: Date;
             expiresAt: Date;
@@ -39,12 +39,12 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshToken> {
 
     async execute(command: RefreshToken): Promise<TokensPair> {
         // извлекаем мета данные для сессии
-        const { userId, deviceUUID, sessionId, issuedAt, expiresAt } =
+        const { userId, deviceId, sessionId, issuedAt, expiresAt } =
             command.payload;
 
         if (
             !userId ||
-            !deviceUUID ||
+            !deviceId ||
             !sessionId ||
             !(issuedAt instanceof Date) ||
             isNaN(issuedAt.getTime()) ||
@@ -73,7 +73,7 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshToken> {
         // создаем пару токенов
         const tokensPair = await this.jwtTokenProvider.generatePairOfTokens({
             userId: userId,
-            deviceUUID: deviceUUID,
+            deviceId: deviceId,
         });
 
         // внутри генератора токенов было рассчиатно и возвращено обновленные время создания и время жизни токена, которые мы запишем в сессию

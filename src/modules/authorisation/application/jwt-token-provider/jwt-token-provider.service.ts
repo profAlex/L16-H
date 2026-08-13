@@ -4,7 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 
 export type JwtPayload = {
     userId: string;
-    deviceUUID: string;
+    deviceId: string;
 };
 
 @Injectable()

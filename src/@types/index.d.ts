@@ -8,7 +8,7 @@ declare global {
         // внимание: расширяем именно User! не Request как ранее! расширяем user т.к. мы это используем совместно со стратегией, которая по умолчанию под капотом возвращает внутрь req.user все извлекаемые в validate значения
         export interface User {
             userId: string,
-            deviceUUID: string,
+            deviceId: string,
             expiresAt: Date,
             issuedAt: Date,
             sessionId: string,

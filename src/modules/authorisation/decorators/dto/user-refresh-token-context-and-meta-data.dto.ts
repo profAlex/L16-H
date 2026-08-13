@@ -7,7 +7,7 @@ export class UserRefreshTokenContextAndMetaDataDto {
 
     @IsString()
     @IsNotEmpty()
-    deviceUUID!: string;
+    deviceId!: string;
 
     @IsString()
     @IsNotEmpty()
