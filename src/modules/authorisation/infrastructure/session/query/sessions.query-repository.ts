@@ -31,9 +31,11 @@ export class SessionsQueryRepository {
     }
 
     async getActiveSessionList(userId: string): Promise<Session[]> {
+        const currentDate = new Date();
         return this.SessionModel.find({
             userId: userId,
             deletedAt: null,
+            expiresAt: { $gt: currentDate },
         })
             .lean<Session[]>()
             .exec();

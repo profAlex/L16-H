@@ -5,6 +5,7 @@ import {
 } from '../../domain/session.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { Injectable } from '@nestjs/common';
+import { Types } from 'mongoose';
 
 export type SessionParameters = {
     userId: string;
@@ -72,7 +73,7 @@ export class SessionsCommandRepository {
         const result = await this.SessionModel.updateMany(
             {
                 userId: userId,
-                _id: { $ne: sessionId },
+                _id: { $ne: new Types.ObjectId(sessionId) },
                 deletedAt: null, // помечаем только те, что еще не были удалены
             },
             {
