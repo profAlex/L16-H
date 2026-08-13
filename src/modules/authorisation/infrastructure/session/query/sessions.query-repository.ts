@@ -20,8 +20,8 @@ export class SessionsQueryRepository {
             {
                 userId: userId,
                 deviceUUID: deviceId,
-                // expiresAt: expiresAt,
-                expiresAt: { $gt: new Date() },
+                expiresAt: expiresAt,
+                // expiresAt: { $gt: new Date() },
                 issuedAt: issuedAt,
                 deletedAt: null,
             },
